@@ -88,14 +88,8 @@ public class QuestionServiceImpl implements QuestionService {
         question.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         question.setExamQuestions(List.of(examQuestion));
         question = questionRepository.save(question);
-        
-        if (questionRequest.getAnswers() != null) {
-            question.setAnswers(answerService.internalSaveAnswers(question, questionRequest.getAnswers()));
-        }
-        
-        if (questionRequest.getQuestionImageRequests() != null) {
-            question.setQuestionImages(questionImageService.internalSaveQuestionImage(question, questionRequest.getQuestionImageRequests()));
-        }
+        question.setAnswers(answerService.internalSaveAnswers(question, questionRequest.getAnswers()));
+        question.setQuestionImages(questionImageService.internalSaveQuestionImage(question, questionRequest.getQuestionImageRequests()));
         question = questionRepository.save(question);
         return question;
     }

@@ -62,8 +62,6 @@ public class ExamQuestionServiceImpl implements ExamQuestionService {
     @Override
     public List<ExamQuestion> internalSaveExamQuestion(Exam exam,List<QuestionRequest> questionRequest) {
         List<ExamQuestion> examQuestions = new ArrayList<>();
-        if (questionRequest == null || questionRequest.isEmpty()) return examQuestions;
-
         for (QuestionRequest questionReq : questionRequest) {
             ExamQuestion examQuestion = new ExamQuestion();
             examQuestion.setExam(exam);

@@ -53,7 +53,6 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public List<Answer> internalSaveAnswers(Question question, List<AnswerRequest> answerRequestList) {
         List<Answer> answerList = new ArrayList<>();
-        if (answerRequestList == null || answerRequestList.isEmpty()) return answerList;
 
         for (AnswerRequest answerRequest : answerRequestList) {
             Answer answer = answerMapper.toEntity(answerRequest);
@@ -63,13 +62,12 @@ public class AnswerServiceImpl implements AnswerService {
             answer.setCreatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             answer.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
 
-            // Lưu answer trước để lấy ID
             answer = answerRepository.save(answer);
 
-            // Khởi tạo list ảnh và lưu các ảnh
-            answer.setAnswerImages(answerImageService.internalSaveAnswerImage(answer, answerRequest.getAnswerImageRequests()));
+            answer.setAnswerImages(answerImageService.internalSaveAnswerImage(answer,answerRequest.getAnswerImageRequests())); // Initialize the answerImages list
 
-            answerList.add(answer);
+
+            answerList.add(answerRepository.save(answer));
         }
         return answerList;
     }

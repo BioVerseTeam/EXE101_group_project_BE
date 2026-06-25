@@ -48,13 +48,6 @@ public class AnswerImageServiceImpl implements AnswerImageService {
     @Override
     public List<AnswerImage> internalSaveAnswerImage(Answer answer, List<AnswerImageRequest> request) {
         List<AnswerImage> answerImages = new ArrayList<>();
-        if (request == null || request.isEmpty()) return answerImages;
-
-        // Khởi tạo list nếu bị null để tránh NullPointerException khi add
-        if (answer.getAnswerImages() == null) {
-            answer.setAnswerImages(new ArrayList<>());
-        }
-
         for (AnswerImageRequest answerImageRequest : request) {
             AnswerImage answerImage = answerImageMapper.toEntity(answerImageRequest);
             answerImage.setAnswer(answer);
