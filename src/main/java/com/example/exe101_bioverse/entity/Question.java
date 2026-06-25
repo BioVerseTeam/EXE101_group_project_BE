@@ -30,9 +30,9 @@ public class Question {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exam_id")
-    private Exam exam;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "exam_id")
+//    private Exam exam;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExamQuestion> examQuestions;
