@@ -48,6 +48,9 @@ public class AnswerImageServiceImpl implements AnswerImageService {
     @Override
     public List<AnswerImage> internalSaveAnswerImage(Answer answer, List<AnswerImageRequest> request) {
         List<AnswerImage> answerImages = new ArrayList<>();
+        if (answer.getAnswerImages() == null) {
+            answer.setAnswerImages(new ArrayList<>());
+        }
         for (AnswerImageRequest answerImageRequest : request) {
             AnswerImage answerImage = answerImageMapper.toEntity(answerImageRequest);
             answerImage.setAnswer(answer);
@@ -56,17 +59,6 @@ public class AnswerImageServiceImpl implements AnswerImageService {
             answerImage = answerImageRepository.save(answerImage);
             answerImages.add(answerImage);
         }
-//        if (answer.getAnswerImages() == null) {
-//            answer.setAnswerImages(new ArrayList<>());
-//        }
-//        for (AnswerImageRequest answerImageRequest : request) {
-//            AnswerImage answerImage = answerImageMapper.toEntity(answerImageRequest);
-//            answerImage.setAnswer(answer);
-//            answer.getAnswerImages().add(answerImage);
-//            answerImage.setCreatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-//            answerImage = answerImageRepository.save(answerImage);
-//            answerImages.add(answerImage);
-//        }
         return answerImages;
     }
 
