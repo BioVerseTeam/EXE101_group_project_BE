@@ -6,7 +6,7 @@ import com.example.exe101_bioverse.exam.entity.Question;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring") //componentModel = "spring" giúp bạn có thể @Autowired mapper này
+@Mapper(componentModel = "spring", uses = {AnswerMapper.class, QuestionImageMapper.class}) //componentModel = "spring" giúp bạn có thể @Autowired mapper này
 public interface QuestionMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -18,5 +18,6 @@ public interface QuestionMapper {
     Question toEntity(QuestionRequest questionRequest);
 
     @Mapping(target = "questionImageResponses", source = "questionImages")
+    @Mapping(target = "answers", source = "answers")
     QuestionResponse toResponse(Question question);
 }
