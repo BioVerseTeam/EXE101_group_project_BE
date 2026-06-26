@@ -11,7 +11,7 @@ import java.util.List;
 public interface QuestionService {
     QuestionResponse getQuestionById(Long questionId);
     <T> T saveQuestion(QuestionRequest questionRequest, Class<T> returnType);
-    Question internalSaveQuestion(ExamQuestion examQuestion, QuestionRequest questionRequest);
+    Question internalSaveQuestion(QuestionRequest questionRequest);
     List<QuestionResponse> getQuestionsByExamId(Long examId);
     Question internalGetById(Long questionId);
     List<QuestionResponse> getQuestionByType (QuestionType questionType);
