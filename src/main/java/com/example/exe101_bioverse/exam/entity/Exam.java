@@ -29,6 +29,7 @@ public class Exam {
 
     private String subjectName;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,3 +1,10 @@
+-- ĐOẠN MÃ CẬP NHẬT KIỂU DỮ LIỆU ĐỂ TRÁNH LỖI OVERFLOW VARCHAR(255)
+ALTER TABLE question ALTER COLUMN explanation TYPE TEXT;
+ALTER TABLE question ALTER COLUMN description TYPE TEXT;
+ALTER TABLE answer ALTER COLUMN explanation TYPE TEXT;
+ALTER TABLE answer ALTER COLUMN description TYPE TEXT;
+ALTER TABLE exam ALTER COLUMN description TYPE TEXT;
+
 -- Xóa dữ liệu cũ (nếu có) để tránh lỗi trùng lặp ID
 TRUNCATE TABLE answer_image, question_image, answer, exam_question, question, exam RESTART IDENTITY CASCADE;
 
