@@ -25,9 +25,10 @@ public class Question {
     private LocalDateTime createdDate;
 
     private LocalDateTime updatedDate;
-    @Column(name = "explanation")
+    @Column(name = "explanation", columnDefinition = "TEXT")
     private String explain;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
