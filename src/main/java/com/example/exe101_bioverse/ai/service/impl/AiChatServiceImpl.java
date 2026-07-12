@@ -4,6 +4,9 @@ import com.example.exe101_bioverse.ai.client.OpenRouterClient;
 import com.example.exe101_bioverse.ai.dto.AiChatRequest;
 import com.example.exe101_bioverse.ai.dto.AiChatResponse;
 import com.example.exe101_bioverse.ai.dto.ChatMessage;
+import com.example.exe101_bioverse.ai.guardrail.AiGuardrailService;
+import com.example.exe101_bioverse.ai.guardrail.GuardrailAction;
+import com.example.exe101_bioverse.ai.guardrail.GuardrailDecision;
 import com.example.exe101_bioverse.ai.service.AiChatService;
 import com.example.exe101_bioverse.ai.service.FirebaseConversationService;
 import com.example.exe101_bioverse.ai.service.PromptBuilder;
@@ -20,13 +23,16 @@ public class AiChatServiceImpl implements AiChatService {
     private final FirebaseConversationService conversationService;
     private final PromptBuilder promptBuilder;
     private final OpenRouterClient openRouterClient;
+    private final AiGuardrailService aiGuardrailService;
 
     public AiChatServiceImpl(FirebaseConversationService conversationService,
                              PromptBuilder promptBuilder,
-                             OpenRouterClient openRouterClient) {
+                             OpenRouterClient openRouterClient,
+                             AiGuardrailService aiGuardrailService) {
         this.conversationService = conversationService;
         this.promptBuilder = promptBuilder;
         this.openRouterClient = openRouterClient;
+        this.aiGuardrailService = aiGuardrailService;
     }
 
     @Override
@@ -59,7 +65,18 @@ public class AiChatServiceImpl implements AiChatService {
             // 4. Save User's query to Firestore
             conversationService.saveMessage(conversationId, "user", request.question().trim());
 
-            // 5. Load recent history for dialogue memory context
+            // 5. Run Guardrail Safety Check
+            GuardrailDecision decision = aiGuardrailService.checkQuestion(request.question().trim());
+
+            // 6. Handle BLOCK decision (prevent calling LLM API)
+            if (decision.action() == GuardrailAction.BLOCK) {
+                String refusalMessage = decision.message();
+                // Save AI's refusal response to Firestore
+                conversationService.saveMessage(conversationId, "assistant", refusalMessage);
+                return new AiChatResponse(conversationId, refusalMessage);
+            }
+
+            // 7. Load recent history for dialogue memory context
             List<ChatMessage> recentChatMessages = conversationService.getRecentMessages(conversationId);
 
             // Map ChatMessage objects back to Map<String, String> format for PromptBuilder
@@ -70,16 +87,17 @@ public class AiChatServiceImpl implements AiChatService {
                 return m;
             }).collect(Collectors.toList());
 
-            // 6. Build query context payload containing System Prompt and history
-            List<Map<String, String>> promptMessages = promptBuilder.buildPrompt(recentMessages);
+            // 8. Build query context payload containing System Prompt (and extra safety instructions if SAFE_ANSWER)
+            boolean isSafeAnswer = (decision.action() == GuardrailAction.SAFE_ANSWER);
+            List<Map<String, String>> promptMessages = promptBuilder.buildPrompt(recentMessages, isSafeAnswer);
 
-            // 7. Invoke live AI completions from OpenRouter
+            // 9. Invoke live AI completions from OpenRouter
             String answer = openRouterClient.ask(promptMessages);
 
-            // 8. Save AI's response (only if the invoke succeeded without exception)
+            // 10. Save AI's response (only if the invoke succeeded without exception)
             conversationService.saveMessage(conversationId, "assistant", answer);
 
-            // 9. Return updated conversationId and answer payload
+            // 11. Return updated conversationId and answer payload
             return new AiChatResponse(conversationId, answer);
 
         } catch (Exception e) {
