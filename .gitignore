@@ -35,3 +35,4 @@ build/
 ### BioVerse Configs ###
 firebase/serviceAccountKey.json
 .env
+db/*.sql
