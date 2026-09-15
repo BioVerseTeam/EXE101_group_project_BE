@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+target
+.env
+.env.*
+!.env.example
+!.env.prod.example
+*.iml
+db
+firebase/serviceAccountKey.json
+HELP.md
+README.md
+**/.DS_Store
