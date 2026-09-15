@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
 @Component
 public class OpenRouterClient {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     @Value("${bioverse.ai.model}")
     private String aiModel;
@@ -27,17 +28,16 @@ public class OpenRouterClient {
 
     public OpenRouterClient(@Value("${openrouter.base-url}") String baseUrl,
                             @Value("${openrouter.api-key}") String apiKey) {
-        this.webClient = WebClient.builder()
+        this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("Authorization", "Bearer " + apiKey)
-                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 
     /**
      * Sends messages list to OpenRouter completions API and retrieves the generated content.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("unchecked")
     public String ask(List<Map<String, String>> messages) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", aiModel);
@@ -45,19 +45,24 @@ public class OpenRouterClient {
         requestBody.put("max_tokens", maxTokens);
         requestBody.put("messages", messages);
 
-        Map response = webClient.post()
+        Map<String, Object> response = restClient.post()
                 .uri("/chat/completions")
-                .bodyValue(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, clientResponse -> 
-                    clientResponse.bodyToMono(String.class)
-                        .flatMap(errorBody -> Mono.error(new RuntimeException(
-                            "OpenRouter API call failed with HTTP status " + clientResponse.statusCode() 
-                            + ". Response details: " + errorBody
-                        )))
-                )
-                .bodyToMono(Map.class)
-                .block();
+                .onStatus(HttpStatusCode::isError, (request, clientResponse) -> {
+                    String errorBody;
+                    try {
+                        errorBody = new String(clientResponse.getBody().readAllBytes(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        errorBody = "Unable to read error body";
+                    }
+                    throw new RuntimeException(
+                            "OpenRouter API call failed with HTTP status " + clientResponse.getStatusCode()
+                                    + ". Response details: " + errorBody
+                    );
+                })
+                .body(Map.class);
 
         if (response == null) {
             throw new RuntimeException("OpenRouter returned an empty or null response.");

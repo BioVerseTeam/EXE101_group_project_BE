@@ -1,0 +1,66 @@
+# Production: backend + Redis trên cùng Docker network.
+# Redis không publish ra ngoài. Backend đọc .env; host Redis bị override thành tên service.
+#
+# Máy build:
+#   docker compose -f docker-compose.prod.yml build
+#   docker tag bioverse-be:latest YOUR_REGISTRY/bioverse-be:latest
+#   docker push YOUR_REGISTRY/bioverse-be:latest
+#
+# Server (chỉ cần file này + .env + firebase key):
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+
+name: bioverse-prod
+
+services:
+  bioverse-redis:
+    image: redis:7-alpine
+    container_name: bioverse-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    volumes:
+      - bioverse_redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - bioverse
+
+  backend:
+    image: ${BACKEND_IMAGE:-bioverse-be:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bioverse-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      REDIS_HOST: bioverse-redis
+      REDIS_PORT: "6379"
+      REDIS_SSL: "false"
+      REDIS_URL: ""
+    ports:
+      - "${SERVER_PORT:-8088}:8088"
+    volumes:
+      - ${FIREBASE_KEY_PATH:-./firebase/serviceAccountKey.json}:/app/firebase/serviceAccountKey.json:ro
+    depends_on:
+      bioverse-redis:
+        condition: service_healthy
+    networks:
+      - bioverse
+
+volumes:
+  bioverse_redis_data:
+
+networks:
+  bioverse:
