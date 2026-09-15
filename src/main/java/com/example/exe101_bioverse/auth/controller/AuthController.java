@@ -6,7 +6,7 @@ import com.example.exe101_bioverse.auth.dto.request.RefreshTokenRequest;
 import com.example.exe101_bioverse.auth.dto.request.RegisterRequest;
 import com.example.exe101_bioverse.auth.dto.response.AuthResponse;
 import com.example.exe101_bioverse.auth.service.AuthService;
-import com.example.exe101_bioverse.exam.dto.ApiResponse;
+import com.example.exe101_bioverse.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -38,8 +38,8 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest
     ) {
-        AuthResponse payload = authService.register(request, httpRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(success(payload));
+        AuthResponse data = authService.register(request, httpRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(data));
     }
 
     @PostMapping("/login")
@@ -49,8 +49,8 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        AuthResponse payload = authService.login(request, httpRequest);
-        return ResponseEntity.ok(success(payload));
+        AuthResponse data = authService.login(request, httpRequest);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @PostMapping("/refresh")
@@ -60,8 +60,8 @@ public class AuthController {
             @Valid @RequestBody RefreshTokenRequest request,
             HttpServletRequest httpRequest
     ) {
-        AuthResponse payload = authService.refresh(request, httpRequest);
-        return ResponseEntity.ok(success(payload));
+        AuthResponse data = authService.refresh(request, httpRequest);
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @PostMapping("/logout")
@@ -72,7 +72,7 @@ public class AuthController {
             HttpServletRequest httpRequest
     ) {
         authService.logout(request, httpRequest);
-        return ResponseEntity.ok(success(null));
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PostMapping("/logout-all")
@@ -80,13 +80,6 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<Void>> logoutAll(HttpServletRequest httpRequest) {
         authService.logoutAll(httpRequest);
-        return ResponseEntity.ok(success(null));
-    }
-
-    private <T> ApiResponse<T> success(T payload) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.setStatus("success");
-        response.setPayload(payload);
-        return response;
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

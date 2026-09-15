@@ -16,12 +16,12 @@ import com.example.exe101_bioverse.auth.repository.UserSessionRepository;
 import com.example.exe101_bioverse.auth.service.AuthService;
 import com.example.exe101_bioverse.auth.service.JwtService;
 import com.example.exe101_bioverse.auth.service.TokenBlacklistService;
-import com.example.exe101_bioverse.common.exception.ApiException;
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,11 +69,11 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
         String email = normalizeEmail(request.getEmail());
         if (userRepository.existsByEmail(email)) {
-            throw new ApiException(HttpStatus.CONFLICT, "email", "Email is already registered");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         Role studentRole = roleRepository.findByCode(STUDENT_ROLE)
-                .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Student role is not configured"));
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_CONFIGURED));
 
         LocalDateTime now = LocalDateTime.now(VN_ZONE);
         User user = User.builder()
@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "status", "Account is not active");
+            throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
         }
 
         user.setLastLoginAt(LocalDateTime.now(VN_ZONE));
@@ -120,17 +120,17 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request, HttpServletRequest httpRequest) {
         UserSession session = userSessionRepository.findByRefreshToken(request.getRefreshToken())
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "refreshToken", "Invalid refresh token"));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if (session.getExpiresAt().isBefore(LocalDateTime.now(VN_ZONE))) {
             userSessionRepository.delete(session);
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "refreshToken", "Refresh token has expired");
+            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         User user = session.getUser();
         if (user.getStatus() != UserStatus.ACTIVE) {
             userSessionRepository.delete(session);
-            throw new ApiException(HttpStatus.FORBIDDEN, "status", "Account is not active");
+            throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
         }
 
         userSessionRepository.delete(session);
@@ -145,10 +145,10 @@ public class AuthServiceImpl implements AuthService {
         Long userId = Long.parseLong(claims.getSubject());
 
         UserSession session = userSessionRepository.findByRefreshToken(request.getRefreshToken())
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "refreshToken", "Invalid refresh token"));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if (!session.getUser().getId().equals(userId)) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "refreshToken", "Refresh token does not belong to this user");
+            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         userSessionRepository.delete(session);
@@ -194,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
     private String requireBearerToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "authorization", "Missing access token");
+            throw new AppException(ErrorCode.MISSING_ACCESS_TOKEN);
         }
         return header.substring(7);
     }
@@ -203,16 +203,16 @@ public class AuthServiceImpl implements AuthService {
         try {
             Claims claims = jwtService.parseClaimsAllowExpired(accessToken);
             if (!"access".equals(claims.get("type", String.class))) {
-                throw new ApiException(HttpStatus.UNAUTHORIZED, "authorization", "Invalid access token");
+                throw new AppException(ErrorCode.INVALID_ACCESS_TOKEN);
             }
             return claims;
         } catch (JwtException | IllegalArgumentException ex) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "authorization", "Invalid access token");
+            throw new AppException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 
-    private ApiException invalidCredentials() {
-        return new ApiException(HttpStatus.UNAUTHORIZED, "credentials", "Invalid email or password");
+    private AppException invalidCredentials() {
+        return new AppException(ErrorCode.INVALID_CREDENTIALS);
     }
 
     private String normalizeEmail(String email) {

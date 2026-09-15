@@ -1,75 +1,94 @@
 package com.example.exe101_bioverse.common.exception;
 
-import com.example.exe101_bioverse.exam.dto.ApiResponse;
-import jakarta.validation.ConstraintViolation;
+import com.example.exe101_bioverse.common.response.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Gom các lỗi validation về đúng định dạng {@link ApiResponse} dùng chung toàn hệ thống:
- * {@code { "status": "error", "errors": { "field": ["message", ...] } }}.
- */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Lỗi @Valid trên @RequestBody (DTO) -> MethodArgumentNotValidException.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-        Map<String, List<String>> errors = new LinkedHashMap<>();
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            errors.computeIfAbsent(fieldError.getField(), key -> new ArrayList<>())
-                    .add(fieldError.getDefaultMessage());
-        }
-        return buildResponse(errors);
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(ApiResponse.error(errorCode.getCode(), ex.getMessage()));
     }
 
-    /**
-     * Lỗi validation trên @RequestParam / @PathVariable -> ConstraintViolationException.
-     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.putIfAbsent(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.INVALID_DATA.getCode(), "Dữ liệu không hợp lệ", fieldErrors));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException ex) {
-        Map<String, List<String>> errors = new LinkedHashMap<>();
-        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-            String field = violation.getPropertyPath().toString();
-            errors.computeIfAbsent(field, key -> new ArrayList<>())
-                    .add(violation.getMessage());
-        }
-        return buildResponse(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.INVALID_DATA.getCode(), ex.getMessage()));
     }
 
-    /**
-     * Body JSON không đọc/parse được (sai kiểu, JSON hỏng, enum không hợp lệ...).
-     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
-        Map<String, List<String>> errors = new LinkedHashMap<>();
-        errors.put("body", Collections.singletonList("Malformed or unreadable request body"));
-        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.INVALID_DATA.getCode(), "Dữ liệu không hợp lệ"));
     }
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
-        return buildResponse(ex.getStatus(), ex.getErrors());
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidSort(PropertyReferenceException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.INVALID_DATA.getCode(), "Trường sắp xếp không hợp lệ"));
     }
 
-    private ResponseEntity<ApiResponse<Void>> buildResponse(Map<String, List<String>> errors) {
-        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(ErrorCode.FILE_TOO_LARGE.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.FILE_TOO_LARGE.getCode(), ErrorCode.FILE_TOO_LARGE.getMessage()));
     }
 
-    private ResponseEntity<ApiResponse<Void>> buildResponse(HttpStatus status, Map<String, List<String>> errors) {
-        ApiResponse<Void> response = new ApiResponse<>();
-        response.setStatus("error");
-        response.setErrors(errors);
-        return ResponseEntity.status(status).body(response);
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingUploadPart(MissingServletRequestPartException ex) {
+        return ResponseEntity.status(ErrorCode.INVALID_FILE.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_FILE.getCode(), "Thiếu file"));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipart(MultipartException ex) {
+        return ResponseEntity.status(ErrorCode.INVALID_FILE.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_FILE.getCode(), "File không hợp lệ"));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(ErrorCode.ACCESS_DENIED.getHttpStatus())
+                .body(ApiResponse.error(ErrorCode.ACCESS_DENIED.getCode(), ErrorCode.ACCESS_DENIED.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleUncategorized(Exception ex) {
+        log.error("Unhandled exception: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(
+                        ErrorCode.UNCATEGORIZED.getCode(),
+                        "Lỗi hệ thống, vui lòng thử lại sau"
+                ));
     }
 }

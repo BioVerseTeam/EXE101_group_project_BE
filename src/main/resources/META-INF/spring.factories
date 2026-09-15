@@ -1,2 +1,0 @@
-org.springframework.boot.EnvironmentPostProcessor=\
-com.example.exe101_bioverse.common.config.DotEnvEnvironmentPostProcessor
