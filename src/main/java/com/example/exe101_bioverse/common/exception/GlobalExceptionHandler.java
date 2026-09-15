@@ -54,13 +54,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
         Map<String, List<String>> errors = new LinkedHashMap<>();
         errors.put("body", Collections.singletonList("Malformed or unreadable request body"));
-        return buildResponse(errors);
+        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
+        return buildResponse(ex.getStatus(), ex.getErrors());
     }
 
     private ResponseEntity<ApiResponse<Void>> buildResponse(Map<String, List<String>> errors) {
+        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    }
+
+    private ResponseEntity<ApiResponse<Void>> buildResponse(HttpStatus status, Map<String, List<String>> errors) {
         ApiResponse<Void> response = new ApiResponse<>();
         response.setStatus("error");
         response.setErrors(errors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(status).body(response);
     }
 }
