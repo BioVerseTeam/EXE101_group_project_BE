@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${purposeTitle}">Mã OTP Bioverse</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f6f4;font-family:Arial,Helvetica,sans-serif;color:#1f2933;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3f6f4;padding:32px 12px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e4eee8;">
+                <tr>
+                    <td style="background:#0f766e;padding:24px 32px;">
+                        <p style="margin:0;font-size:13px;letter-spacing:0.16em;color:#ccfbf1;text-transform:uppercase;">Bioverse</p>
+                        <h1 style="margin:8px 0 0;font-size:22px;color:#ffffff;" th:text="${purposeTitle}">Xác thực OTP</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:32px;">
+                        <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">
+                            Xin chào <strong th:text="${fullName}">bạn</strong>,
+                        </p>
+                        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;" th:text="${purposeHint}">
+                            Nhập mã OTP để tiếp tục.
+                        </p>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td align="center" style="padding:8px 0 20px;">
+                                    <div style="display:inline-block;background:#ecfdf5;border:1px dashed #0f766e;border-radius:12px;padding:16px 28px;letter-spacing:10px;font-size:32px;font-weight:700;color:#0f766e;"
+                                         th:text="${otp}">000000</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <p style="margin:0 0 8px;font-size:14px;color:#4b5563;">
+                            Mã có hiệu lực trong <strong th:text="${expireMinutes}">10</strong> phút.
+                            Không chia sẻ mã này với bất kỳ ai.
+                        </p>
+                        <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
+                            Nếu bạn không yêu cầu thao tác này, hãy bỏ qua email.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 32px 24px;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;">
+                        © <span th:text="${year}">2026</span> Bioverse. Email được gửi tự động, vui lòng không trả lời.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
