@@ -154,6 +154,9 @@ public class AuthServiceImpl implements AuthService {
             otpService.markCooldown(email, OtpPurpose.REGISTER);
             return otpSent(email, OtpPurpose.REGISTER);
         }
+        if (purpose == OtpPurpose.CHANGE_PASSWORD) {
+            throw new AppException(ErrorCode.INVALID_DATA, "Đổi mật khẩu cần đăng nhập rồi gọi /api/users/me/password/otp");
+        }
 
         User user = userRepository.findByEmail(email).orElse(null);
         String otp = otpService.issueOtp(email, OtpPurpose.RESET_PASSWORD);
