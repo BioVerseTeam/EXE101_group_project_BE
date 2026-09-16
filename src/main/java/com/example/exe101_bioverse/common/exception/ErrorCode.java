@@ -19,6 +19,13 @@ public enum ErrorCode {
     INVALID_ACCESS_TOKEN(1007, "Access token không hợp lệ", HttpStatus.UNAUTHORIZED),
     MISSING_ACCESS_TOKEN(1008, "Thiếu access token", HttpStatus.UNAUTHORIZED),
     ROLE_NOT_CONFIGURED(1009, "Vai trò chưa được cấu hình", HttpStatus.INTERNAL_SERVER_ERROR),
+    OTP_INVALID(1010, "Mã OTP không đúng", HttpStatus.BAD_REQUEST),
+    OTP_EXPIRED(1011, "Mã OTP đã hết hạn hoặc chưa được gửi", HttpStatus.BAD_REQUEST),
+    OTP_RESEND_TOO_SOON(1012, "Vui lòng đợi trước khi gửi lại mã OTP", HttpStatus.TOO_MANY_REQUESTS),
+    OTP_MAX_ATTEMPTS(1013, "Bạn đã nhập sai quá số lần cho phép. Vui lòng gửi lại mã OTP", HttpStatus.TOO_MANY_REQUESTS),
+    PENDING_REGISTRATION_EXPIRED(1014, "Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại", HttpStatus.BAD_REQUEST),
+    INVALID_RESET_TOKEN(1015, "Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED),
+    EMAIL_SEND_FAILED(1016, "Không gửi được email. Vui lòng thử lại sau", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // Request 14xx
     INVALID_DATA(1400, "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST),
