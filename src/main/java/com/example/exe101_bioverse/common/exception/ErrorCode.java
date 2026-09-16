@@ -28,6 +28,10 @@ public enum ErrorCode {
     EMAIL_SEND_FAILED(1016, "Không gửi được email. Vui lòng thử lại sau", HttpStatus.INTERNAL_SERVER_ERROR),
     CANNOT_MODIFY_OWN_ACCOUNT(1017, "Không thể thay đổi vai trò hoặc trạng thái của chính mình", HttpStatus.FORBIDDEN),
     LAST_ACTIVE_ADMIN(1018, "Phải còn ít nhất một admin đang hoạt động", HttpStatus.CONFLICT),
+    ROLE_NOT_FOUND(1019, "Không tìm thấy vai trò", HttpStatus.NOT_FOUND),
+    ROLE_CODE_ALREADY_EXISTS(1020, "Mã vai trò đã tồn tại", HttpStatus.CONFLICT),
+    ROLE_IN_USE(1021, "Không thể xóa vai trò đang được gán cho người dùng", HttpStatus.CONFLICT),
+    SYSTEM_ROLE_PROTECTED(1022, "Không thể xóa hoặc đổi mã vai trò hệ thống", HttpStatus.FORBIDDEN),
 
     // Request 14xx
     INVALID_DATA(1400, "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST),

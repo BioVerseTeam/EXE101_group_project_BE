@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -27,6 +28,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneAndIdNot(String phone, Long id);
 
     long countByRole_CodeAndStatus(String roleCode, UserStatus status);
+
+    boolean existsByRole_Id(Long roleId);
+
+    @Query("SELECT u.id FROM User u WHERE u.role.id = :roleId")
+    List<Long> findIdsByRoleId(@Param("roleId") Long roleId);
 
     @EntityGraph(attributePaths = "role")
     @Query("""
