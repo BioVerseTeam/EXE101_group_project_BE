@@ -1,13 +1,21 @@
 package com.example.exe101_bioverse.auth.service.impl;
 
+import com.example.exe101_bioverse.auth.dto.PendingRegistration;
+import com.example.exe101_bioverse.auth.dto.request.ForgotPasswordRequest;
 import com.example.exe101_bioverse.auth.dto.request.LoginRequest;
 import com.example.exe101_bioverse.auth.dto.request.LogoutRequest;
 import com.example.exe101_bioverse.auth.dto.request.RefreshTokenRequest;
 import com.example.exe101_bioverse.auth.dto.request.RegisterRequest;
+import com.example.exe101_bioverse.auth.dto.request.ResendOtpRequest;
+import com.example.exe101_bioverse.auth.dto.request.ResetPasswordRequest;
+import com.example.exe101_bioverse.auth.dto.request.VerifyOtpRequest;
 import com.example.exe101_bioverse.auth.dto.response.AuthResponse;
+import com.example.exe101_bioverse.auth.dto.response.OtpSentResponse;
+import com.example.exe101_bioverse.auth.dto.response.ResetTokenResponse;
 import com.example.exe101_bioverse.auth.entity.Role;
 import com.example.exe101_bioverse.auth.entity.User;
 import com.example.exe101_bioverse.auth.entity.UserSession;
+import com.example.exe101_bioverse.auth.enums.OtpPurpose;
 import com.example.exe101_bioverse.auth.enums.UserStatus;
 import com.example.exe101_bioverse.auth.mapper.UserMapper;
 import com.example.exe101_bioverse.auth.repository.RoleRepository;
@@ -15,6 +23,8 @@ import com.example.exe101_bioverse.auth.repository.UserRepository;
 import com.example.exe101_bioverse.auth.repository.UserSessionRepository;
 import com.example.exe101_bioverse.auth.service.AuthService;
 import com.example.exe101_bioverse.auth.service.JwtService;
+import com.example.exe101_bioverse.auth.service.MailService;
+import com.example.exe101_bioverse.auth.service.OtpService;
 import com.example.exe101_bioverse.auth.service.TokenBlacklistService;
 import com.example.exe101_bioverse.common.exception.AppException;
 import com.example.exe101_bioverse.common.exception.ErrorCode;
@@ -45,6 +55,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
     private final UserMapper userMapper;
+    private final OtpService otpService;
+    private final MailService mailService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -53,7 +65,9 @@ public class AuthServiceImpl implements AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             TokenBlacklistService tokenBlacklistService,
-            UserMapper userMapper
+            UserMapper userMapper,
+            OtpService otpService,
+            MailService mailService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -62,13 +76,42 @@ public class AuthServiceImpl implements AuthService {
         this.jwtService = jwtService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.userMapper = userMapper;
+        this.otpService = otpService;
+        this.mailService = mailService;
     }
 
     @Override
     @Transactional
-    public AuthResponse register(RegisterRequest request, HttpServletRequest httpRequest) {
+    public OtpSentResponse register(RegisterRequest request) {
         String email = normalizeEmail(request.getEmail());
         if (userRepository.existsByEmail(email)) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        PendingRegistration pending = PendingRegistration.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName().trim())
+                .phone(blankToNull(request.getPhone()))
+                .dateOfBirth(request.getDateOfBirth())
+                .gender(request.getGender())
+                .build();
+        String otp = otpService.issueOtp(email, OtpPurpose.REGISTER);
+        otpService.savePendingRegistration(pending);
+        mailService.sendOtp(email, pending.getFullName(), otp, OtpPurpose.REGISTER, otpService.getExpireMinutes());
+        otpService.markCooldown(email, OtpPurpose.REGISTER);
+        return otpSent(email, OtpPurpose.REGISTER);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse verifyRegister(VerifyOtpRequest request, HttpServletRequest httpRequest) {
+        String email = normalizeEmail(request.getEmail());
+        PendingRegistration pending = otpService.requirePendingRegistration(email);
+        otpService.verifyAndConsume(email, request.getOtp().trim(), OtpPurpose.REGISTER);
+
+        if (userRepository.existsByEmail(email)) {
+            otpService.deletePendingRegistration(email);
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -78,20 +121,97 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime now = LocalDateTime.now(VN_ZONE);
         User user = User.builder()
                 .email(email)
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName().trim())
-                .phone(blankToNull(request.getPhone()))
-                .dateOfBirth(request.getDateOfBirth())
-                .gender(request.getGender())
+                .passwordHash(pending.getPasswordHash())
+                .fullName(pending.getFullName())
+                .phone(pending.getPhone())
+                .dateOfBirth(pending.getDateOfBirth())
+                .gender(pending.getGender())
                 .role(studentRole)
                 .status(UserStatus.ACTIVE)
-                .emailVerified(false)
+                .emailVerified(true)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
 
         user = userRepository.save(user);
+        otpService.deletePendingRegistration(email);
         return issueTokens(user, httpRequest);
+    }
+
+    @Override
+    @Transactional
+    public OtpSentResponse resendOtp(ResendOtpRequest request) {
+        String email = normalizeEmail(request.getEmail());
+        OtpPurpose purpose = request.getPurpose();
+        if (purpose == OtpPurpose.REGISTER) {
+            PendingRegistration pending = otpService.requirePendingRegistration(email);
+            if (userRepository.existsByEmail(email)) {
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            otpService.savePendingRegistration(pending);
+            String otp = otpService.issueOtp(email, OtpPurpose.REGISTER);
+            mailService.sendOtp(email, pending.getFullName(), otp, OtpPurpose.REGISTER, otpService.getExpireMinutes());
+            otpService.markCooldown(email, OtpPurpose.REGISTER);
+            return otpSent(email, OtpPurpose.REGISTER);
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        String otp = otpService.issueOtp(email, OtpPurpose.RESET_PASSWORD);
+        if (user != null && user.getStatus() == UserStatus.ACTIVE) {
+            mailService.sendOtp(email, user.getFullName(), otp, OtpPurpose.RESET_PASSWORD, otpService.getExpireMinutes());
+        }
+        otpService.markCooldown(email, OtpPurpose.RESET_PASSWORD);
+        return otpSent(email, OtpPurpose.RESET_PASSWORD);
+    }
+
+    @Override
+    @Transactional
+    public OtpSentResponse forgotPassword(ForgotPasswordRequest request) {
+        String email = normalizeEmail(request.getEmail());
+        User user = userRepository.findByEmail(email).orElse(null);
+        String otp = otpService.issueOtp(email, OtpPurpose.RESET_PASSWORD);
+        if (user != null && user.getStatus() == UserStatus.ACTIVE) {
+            mailService.sendOtp(email, user.getFullName(), otp, OtpPurpose.RESET_PASSWORD, otpService.getExpireMinutes());
+        }
+        otpService.markCooldown(email, OtpPurpose.RESET_PASSWORD);
+        return otpSent(email, OtpPurpose.RESET_PASSWORD);
+    }
+
+    @Override
+    @Transactional
+    public ResetTokenResponse verifyResetOtp(VerifyOtpRequest request) {
+        String email = normalizeEmail(request.getEmail());
+        otpService.verifyAndConsume(email, request.getOtp().trim(), OtpPurpose.RESET_PASSWORD);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.OTP_EXPIRED));
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
+        }
+
+        String resetToken = otpService.createResetTicket(email);
+        return ResetTokenResponse.builder()
+                .resetToken(resetToken)
+                .expiresInSeconds(otpService.getResetTokenTtlSeconds())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String email = otpService.consumeResetTicket(request.getResetToken().trim());
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setUpdatedAt(LocalDateTime.now(VN_ZONE));
+        userRepository.save(user);
+
+        userSessionRepository.deleteByUserId(user.getId());
+        tokenBlacklistService.invalidateAllUserTokens(user.getId(), jwtService.getRefreshTokenExpirationMs());
     }
 
     @Override
@@ -165,6 +285,15 @@ public class AuthServiceImpl implements AuthService {
         userSessionRepository.deleteByUserId(userId);
         tokenBlacklistService.blacklistAccessToken(accessToken, claims);
         tokenBlacklistService.invalidateAllUserTokens(userId, jwtService.getRefreshTokenExpirationMs());
+    }
+
+    private OtpSentResponse otpSent(String email, OtpPurpose purpose) {
+        return OtpSentResponse.builder()
+                .email(email)
+                .purpose(purpose)
+                .expiresInSeconds(otpService.getTtlSeconds())
+                .resendAfterSeconds(otpService.getResendCooldownSeconds())
+                .build();
     }
 
     private AuthResponse issueTokens(User user, HttpServletRequest httpRequest) {
