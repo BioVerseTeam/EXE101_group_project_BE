@@ -79,20 +79,26 @@ public class MailService {
     }
 
     private String purposeSubject(OtpPurpose purpose) {
-        return purpose == OtpPurpose.REGISTER
-                ? "Mã xác thực đăng ký Bioverse"
-                : "Mã đặt lại mật khẩu Bioverse";
+        return switch (purpose) {
+            case REGISTER -> "Mã xác thực đăng ký Bioverse";
+            case RESET_PASSWORD -> "Mã đặt lại mật khẩu Bioverse";
+            case CHANGE_PASSWORD -> "Mã xác thực đổi mật khẩu Bioverse";
+        };
     }
 
     private String purposeTitle(OtpPurpose purpose) {
-        return purpose == OtpPurpose.REGISTER
-                ? "Xác thực đăng ký tài khoản"
-                : "Đặt lại mật khẩu";
+        return switch (purpose) {
+            case REGISTER -> "Xác thực đăng ký tài khoản";
+            case RESET_PASSWORD -> "Đặt lại mật khẩu";
+            case CHANGE_PASSWORD -> "Đổi mật khẩu";
+        };
     }
 
     private String purposeHint(OtpPurpose purpose) {
-        return purpose == OtpPurpose.REGISTER
-                ? "Nhập mã này để hoàn tất đăng ký tài khoản Bioverse."
-                : "Nhập mã này để xác thực và đặt lại mật khẩu Bioverse.";
+        return switch (purpose) {
+            case REGISTER -> "Nhập mã này để hoàn tất đăng ký tài khoản Bioverse.";
+            case RESET_PASSWORD -> "Nhập mã này để xác thực và đặt lại mật khẩu Bioverse.";
+            case CHANGE_PASSWORD -> "Nhập mã này cùng mật khẩu mới để đổi mật khẩu tài khoản Bioverse.";
+        };
     }
 }

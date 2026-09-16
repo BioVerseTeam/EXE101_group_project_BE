@@ -26,6 +26,8 @@ public enum ErrorCode {
     PENDING_REGISTRATION_EXPIRED(1014, "Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại", HttpStatus.BAD_REQUEST),
     INVALID_RESET_TOKEN(1015, "Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED),
     EMAIL_SEND_FAILED(1016, "Không gửi được email. Vui lòng thử lại sau", HttpStatus.INTERNAL_SERVER_ERROR),
+    CANNOT_MODIFY_OWN_ACCOUNT(1017, "Không thể thay đổi vai trò hoặc trạng thái của chính mình", HttpStatus.FORBIDDEN),
+    LAST_ACTIVE_ADMIN(1018, "Phải còn ít nhất một admin đang hoạt động", HttpStatus.CONFLICT),
 
     // Request 14xx
     INVALID_DATA(1400, "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST),
