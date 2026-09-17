@@ -37,7 +37,12 @@ public enum ErrorCode {
     INVALID_DATA(1400, "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST),
     ACCESS_DENIED(1403, "Bạn không có quyền truy cập", HttpStatus.FORBIDDEN),
     INVALID_FILE(1410, "File không hợp lệ", HttpStatus.BAD_REQUEST),
-    FILE_TOO_LARGE(1411, "File vượt quá dung lượng cho phép", HttpStatus.BAD_REQUEST);
+    FILE_TOO_LARGE(1411, "File vượt quá dung lượng cho phép", HttpStatus.BAD_REQUEST),
+
+    // Storage / 3D models 15xx
+    MODEL_NOT_FOUND(1501, "Không tìm thấy model 3D", HttpStatus.NOT_FOUND),
+    STORAGE_NOT_CONFIGURED(1502, "Chưa cấu hình Cloudflare R2", HttpStatus.SERVICE_UNAVAILABLE),
+    STORAGE_ERROR(1503, "Không tải được model 3D", HttpStatus.BAD_GATEWAY);
 
     private final int code;
     private final String message;
