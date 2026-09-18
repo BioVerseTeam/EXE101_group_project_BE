@@ -54,6 +54,7 @@ public class DataSeeder implements ApplicationRunner {
                         "Admin@123456",
                         "Bioverse Admin",
                         "0900000001",
+                        null,
                         LocalDate.of(1998, 1, 15),
                         GenderType.MALE,
                         adminRole
@@ -63,6 +64,7 @@ public class DataSeeder implements ApplicationRunner {
                         "Student@123456",
                         "Nguyen Van A",
                         "0900000002",
+                        8,
                         LocalDate.of(2010, 5, 20),
                         GenderType.MALE,
                         studentRole
@@ -72,6 +74,7 @@ public class DataSeeder implements ApplicationRunner {
                         "Student@123456",
                         "Tran Thi B",
                         "0900000003",
+                        7,
                         LocalDate.of(2011, 8, 8),
                         GenderType.FEMALE,
                         studentRole
@@ -88,6 +91,7 @@ public class DataSeeder implements ApplicationRunner {
                     .passwordHash(passwordEncoder.encode(seed.password()))
                     .fullName(seed.fullName())
                     .phone(seed.phone())
+                    .grade(seed.grade())
                     .dateOfBirth(seed.dateOfBirth())
                     .gender(seed.gender())
                     .role(seed.role())
@@ -111,6 +115,7 @@ public class DataSeeder implements ApplicationRunner {
             String password,
             String fullName,
             String phone,
+            Integer grade,
             LocalDate dateOfBirth,
             GenderType gender,
             Role role

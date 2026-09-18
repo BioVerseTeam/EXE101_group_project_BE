@@ -37,6 +37,10 @@ public class User {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+    /** Lớp đang học: 6, 7, 8 hoặc 9. Null với tài khoản không phải học sinh. */
+    @Column
+    private Integer grade;
+
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 

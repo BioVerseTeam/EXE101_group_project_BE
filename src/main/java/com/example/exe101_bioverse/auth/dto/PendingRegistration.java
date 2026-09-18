@@ -17,6 +17,7 @@ public class PendingRegistration {
     private String passwordHash;
     private String fullName;
     private String phone;
+    private Integer grade;
     private LocalDate dateOfBirth;
     private GenderType gender;
 }

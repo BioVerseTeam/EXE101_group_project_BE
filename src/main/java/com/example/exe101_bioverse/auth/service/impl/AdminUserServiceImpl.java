@@ -100,6 +100,9 @@ public class AdminUserServiceImpl implements AdminUserService {
             }
             user.setPhone(phone);
         }
+        if (request.getGrade() != null) {
+            user.setGrade(request.getGrade());
+        }
         if (request.getAvatarUrl() != null) {
             user.setAvatarUrl(blankToNull(request.getAvatarUrl()));
         }
