@@ -39,7 +39,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @SecurityRequirements
-    @Operation(summary = "Start registration and send OTP to email")
+    @Operation(summary = "Start registration and send OTP to email. Body must include grade (6-9).")
     public ResponseEntity<ApiResponse<OtpSentResponse>> register(@Valid @RequestBody RegisterRequest request) {
         OtpSentResponse data = authService.register(request);
         return ResponseEntity.ok(ApiResponse.success(data, "Đã gửi mã OTP đến email"));

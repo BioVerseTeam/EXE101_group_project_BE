@@ -3,7 +3,10 @@ package com.example.exe101_bioverse.auth.dto.request;
 import com.example.exe101_bioverse.auth.enums.GenderType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +38,11 @@ public class RegisterRequest {
 
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
+
+    @NotNull(message = "Grade is required")
+    @Min(value = 6, message = "Grade must be between 6 and 9")
+    @Max(value = 9, message = "Grade must be between 6 and 9")
+    private Integer grade;
 
     private LocalDate dateOfBirth;
 

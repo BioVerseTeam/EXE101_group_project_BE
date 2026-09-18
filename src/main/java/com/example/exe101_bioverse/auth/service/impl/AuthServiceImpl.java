@@ -93,6 +93,7 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName().trim())
                 .phone(blankToNull(request.getPhone()))
+                .grade(request.getGrade())
                 .dateOfBirth(request.getDateOfBirth())
                 .gender(request.getGender())
                 .build();
@@ -124,6 +125,7 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(pending.getPasswordHash())
                 .fullName(pending.getFullName())
                 .phone(pending.getPhone())
+                .grade(pending.getGrade())
                 .dateOfBirth(pending.getDateOfBirth())
                 .gender(pending.getGender())
                 .role(studentRole)
