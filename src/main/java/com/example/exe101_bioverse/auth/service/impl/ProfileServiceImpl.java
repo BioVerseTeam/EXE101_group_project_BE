@@ -79,6 +79,9 @@ public class ProfileServiceImpl implements ProfileService {
             }
             user.setPhone(phone);
         }
+        if (request.getGrade() != null) {
+            user.setGrade(request.getGrade());
+        }
         if (request.getAvatarUrl() != null) {
             user.setAvatarUrl(blankToNull(request.getAvatarUrl()));
         }
