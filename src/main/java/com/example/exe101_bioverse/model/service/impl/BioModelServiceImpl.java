@@ -41,10 +41,10 @@ public class BioModelServiceImpl implements BioModelService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "sortOrder"));
 
-        // Normalize empty strings to null for flexible filtering
-        String keyword = (q != null && !q.isBlank()) ? q.trim() : null;
-        String cat = (category != null && !category.isBlank()) ? category.trim() : null;
-        String sub = (subject != null && !subject.isBlank()) ? subject.trim() : null;
+        // Dùng chuỗi rỗng thay vì null — Hibernate bind String null thành bytea trên PostgreSQL
+        String keyword = (q != null && !q.isBlank()) ? q.trim().toLowerCase() : "";
+        String cat = (category != null && !category.isBlank()) ? category.trim() : "";
+        String sub = (subject != null && !subject.isBlank()) ? subject.trim() : "";
 
         Page<BioModel> modelPage = bioModelRepository.findCatalogModels(grade, cat, sub, keyword, pageable);
 
@@ -77,7 +77,8 @@ public class BioModelServiceImpl implements BioModelService {
     }
 
     @Override
-    public List<String> getCategories() {
-        return bioModelRepository.findDistinctCategories();
+    public List<String> getCategories(String subject) {
+        String sub = (subject != null && !subject.isBlank()) ? subject.trim() : "";
+        return bioModelRepository.findDistinctCategories(sub);
     }
 }

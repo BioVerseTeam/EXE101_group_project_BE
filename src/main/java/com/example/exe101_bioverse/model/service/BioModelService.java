@@ -23,6 +23,6 @@ public interface BioModelService {
     /** Xem chi tiết model theo slug. */
     ModelDetailResponse getModelBySlug(String slug);
 
-    /** Lấy danh sách thể loại (category) riêng biệt. */
-    List<String> getCategories();
+    /** Lấy danh sách thể loại (category) riêng biệt, có thể lọc theo môn. */
+    List<String> getCategories(String subject);
 }

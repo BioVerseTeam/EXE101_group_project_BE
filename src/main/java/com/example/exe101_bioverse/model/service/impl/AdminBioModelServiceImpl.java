@@ -31,7 +31,7 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
     @Transactional(readOnly = true)
     public PageResponse<ModelDetailResponse> listModels(String q, Boolean isFeatured, Boolean isActive, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        String keyword = (q != null && !q.isBlank()) ? q.trim() : null;
+        String keyword = (q != null && !q.isBlank()) ? q.trim().toLowerCase() : "";
 
         Page<BioModel> modelPage = bioModelRepository.findAdminModels(keyword, isFeatured, isActive, pageable);
         Page<ModelDetailResponse> responsePage = modelPage.map(ModelDetailResponse::from);

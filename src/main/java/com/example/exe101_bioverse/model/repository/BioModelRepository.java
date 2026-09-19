@@ -26,15 +26,15 @@ public interface BioModelRepository extends JpaRepository<BioModel, Long> {
 
     /**
      * Phân trang danh mục với bộ lọc linh hoạt: grade, category, subject, keyword.
-     * Tìm kiếm keyword trong name, nameEn, description.
+     * Chuỗi rỗng = bỏ lọc. Không truyền null String để tránh PostgreSQL lower(bytea).
      */
     @Query("SELECT m FROM BioModel m WHERE m.isActive = true " +
            "AND (:grade IS NULL OR m.grade = :grade) " +
-           "AND (:category IS NULL OR m.category = :category) " +
-           "AND (:subject IS NULL OR m.subject = :subject) " +
-           "AND (:keyword IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR LOWER(m.nameEn) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "AND (:category = '' OR m.category = :category) " +
+           "AND (:subject = '' OR m.subject = :subject) " +
+           "AND (:keyword = '' OR LOWER(m.name) LIKE CONCAT('%', :keyword, '%') " +
+           "     OR LOWER(COALESCE(m.nameEn, '')) LIKE CONCAT('%', :keyword, '%') " +
+           "     OR LOWER(COALESCE(m.description, '')) LIKE CONCAT('%', :keyword, '%'))")
     Page<BioModel> findCatalogModels(
             @Param("grade") Integer grade,
             @Param("category") String category,
@@ -55,9 +55,11 @@ public interface BioModelRepository extends JpaRepository<BioModel, Long> {
 
     /**
      * Lấy danh sách các category riêng biệt (cho tab lọc trên UI).
+     * Có thể lọc theo môn học (BIOLOGY, CHEMISTRY, PHYSICS).
      */
-    @Query("SELECT DISTINCT m.category FROM BioModel m WHERE m.isActive = true AND m.category IS NOT NULL ORDER BY m.category")
-    List<String> findDistinctCategories();
+    @Query("SELECT DISTINCT m.category FROM BioModel m WHERE m.isActive = true AND m.category IS NOT NULL " +
+           "AND (:subject = '' OR m.subject = :subject) ORDER BY m.category")
+    List<String> findDistinctCategories(@Param("subject") String subject);
 
     // ======================== Admin Queries ========================
 
@@ -65,8 +67,8 @@ public interface BioModelRepository extends JpaRepository<BioModel, Long> {
      * Admin: Tìm kiếm tất cả model (bao gồm inactive), lọc theo keyword và featured status.
      */
     @Query("SELECT m FROM BioModel m WHERE " +
-           "(:keyword IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR LOWER(m.nameEn) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "(:keyword = '' OR LOWER(m.name) LIKE CONCAT('%', :keyword, '%') " +
+           "     OR LOWER(COALESCE(m.nameEn, '')) LIKE CONCAT('%', :keyword, '%')) " +
            "AND (:isFeatured IS NULL OR m.isFeatured = :isFeatured) " +
            "AND (:isActive IS NULL OR m.isActive = :isActive)")
     Page<BioModel> findAdminModels(
