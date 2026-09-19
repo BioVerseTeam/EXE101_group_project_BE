@@ -169,6 +169,7 @@ Dự án áp dụng cơ chế quản lý cơ sở dữ liệu phiên bản tự 
 | **`V14__add_featured_and_metadata_to_bio_models.sql`** | Bio Models Metadata | Thêm `slug`, `is_featured`, `views_count`, `grade`, `subject`, `badge_text`, `action_text` |
 | **`V15__user_streaks.sql`** | Daily Streak | Bảng `user_streaks` theo dõi chuỗi ngày học liên tục, kỷ lục dài nhất, ngày điểm danh cuối |
 | **`V16__exam_class_semester_subject_schema.sql`** | Exam Taxonomy | Quản lý đề thi theo Khối lớp (`exam_classes`), Học kỳ (`exam_semesters`), Môn học (`exam_subjects`) |
+| **`V17__seed_exam_data_khtn_grade_6_to_9.sql`** | Seed Exam Data | Tổng hợp 16 bộ đề thi mẫu KHTN (Lớp 6, 7, 8, 9; Giữa kỳ & Cuối kỳ) kèm câu hỏi, đáp án, ảnh |
 
 ---
 
