@@ -13,7 +13,7 @@ import java.util.List;
  * - Subject 1 - N Exam
  */
 @Entity
-@Table(name = "exam_subjects")
+@Table(name = "subjects")
 @Getter
 @Setter
 @NoArgsConstructor

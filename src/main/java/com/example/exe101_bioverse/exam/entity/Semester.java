@@ -9,11 +9,11 @@ import java.util.List;
 /**
  * Entity đại diện cho học kỳ (Học kỳ 1, Học kỳ 2).
  * Quan hệ:
- * - Class 1 - N Semester (Semester N - 1 Class)
+ * - Grade 1 - N Semester (Semester N - 1 Grade)
  * - Semester 1 - N Subject
  */
 @Entity
-@Table(name = "exam_semesters")
+@Table(name = "semesters")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,7 +39,7 @@ public class Semester {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id", nullable = false)
-    private ClassEntity classEntity;
+    private Grade grade;
 
     @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subject> subjects;
