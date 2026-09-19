@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.storage.controller;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.common.response.ApiResponse;
 import com.example.exe101_bioverse.storage.dto.ModelAssetResponse;
 import com.example.exe101_bioverse.storage.service.R2StorageService;
@@ -28,7 +30,7 @@ public class ModelAssetController {
         this.r2StorageService = r2StorageService;
     }
 
-    @GetMapping
+    @GetMapping({ "", "/", "/assets" })
     @Operation(summary = "List 3D model files stored in R2")
     public ResponseEntity<ApiResponse<List<ModelAssetResponse>>> listModels() {
         return ResponseEntity.ok(ApiResponse.success(r2StorageService.listModels()));
@@ -37,6 +39,21 @@ public class ModelAssetController {
     @RequestMapping(value = "/{*objectKey}", method = {RequestMethod.GET, RequestMethod.HEAD})
     @Operation(summary = "Download a 3D model file through the backend")
     public ResponseEntity<StreamingResponseBody> getModel(@PathVariable String objectKey) {
+        if (isReservedKey(objectKey)) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
         return r2StorageService.streamModel(objectKey);
+    }
+
+    private boolean isReservedKey(String objectKey) {
+        if (objectKey == null) return true;
+        String first = objectKey.replaceFirst("^/+", "").split("/")[0].toLowerCase();
+        return first.equals("assets")
+                || first.equals("catalog")
+                || first.equals("categories")
+                || first.equals("featured")
+                || first.equals("labs")
+                || first.equals("detail")
+                || first.equals("slug");
     }
 }

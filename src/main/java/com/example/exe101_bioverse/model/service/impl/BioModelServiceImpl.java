@@ -5,8 +5,11 @@ import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.common.response.PageResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelDetailResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelSummaryResponse;
+import com.example.exe101_bioverse.model.dto.response.LabResponse;
 import com.example.exe101_bioverse.model.entity.BioModel;
 import com.example.exe101_bioverse.model.repository.BioModelRepository;
+import com.example.exe101_bioverse.model.service.BioLabService;
+import com.example.exe101_bioverse.model.service.BioModelCategoryService;
 import com.example.exe101_bioverse.model.service.BioModelService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,9 +25,17 @@ import java.util.List;
 public class BioModelServiceImpl implements BioModelService {
 
     private final BioModelRepository bioModelRepository;
+    private final BioModelCategoryService categoryService;
+    private final BioLabService labService;
 
-    public BioModelServiceImpl(BioModelRepository bioModelRepository) {
+    public BioModelServiceImpl(
+            BioModelRepository bioModelRepository,
+            BioModelCategoryService categoryService,
+            BioLabService labService
+    ) {
         this.bioModelRepository = bioModelRepository;
+        this.categoryService = categoryService;
+        this.labService = labService;
     }
 
     @Override
@@ -79,6 +90,18 @@ public class BioModelServiceImpl implements BioModelService {
     @Override
     public List<String> getCategories(String subject) {
         String sub = (subject != null && !subject.isBlank()) ? subject.trim() : "";
+        List<String> managed = categoryService.listPublic().stream()
+                .filter(item -> sub.isEmpty() || sub.equalsIgnoreCase(item.getSubject()) || item.getSubject() == null)
+                .map(item -> item.getName())
+                .toList();
+        if (!managed.isEmpty()) {
+            return managed;
+        }
         return bioModelRepository.findDistinctCategories(sub);
+    }
+
+    @Override
+    public List<LabResponse> getLabs() {
+        return labService.listPublic();
     }
 }

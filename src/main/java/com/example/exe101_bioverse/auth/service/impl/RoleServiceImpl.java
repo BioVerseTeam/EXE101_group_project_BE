@@ -56,10 +56,11 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<RoleResponse> listRoles(String q, Pageable pageable) {
-        Page<RoleResponse> page = roleRepository
-                .search(blankToNull(q), pageable)
-                .map(roleMapper::toResponse);
-        return PageResponse.from(page);
+        String query = blankToNull(q);
+        Page<Role> page = query == null
+                ? roleRepository.findAll(pageable)
+                : roleRepository.search(query, pageable);
+        return PageResponse.from(page.map(roleMapper::toResponse));
     }
 
     @Override

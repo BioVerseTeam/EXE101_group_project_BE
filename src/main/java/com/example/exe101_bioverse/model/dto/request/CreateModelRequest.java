@@ -72,6 +72,7 @@ public class CreateModelRequest {
 
     // Flags
     private Boolean isFeatured;
+    private Boolean isActive;
     private Integer sortOrder;
     private Long lessonId;
 }

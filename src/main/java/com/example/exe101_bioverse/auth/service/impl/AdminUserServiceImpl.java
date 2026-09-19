@@ -6,16 +6,19 @@ import com.example.exe101_bioverse.auth.entity.Role;
 import com.example.exe101_bioverse.auth.entity.User;
 import com.example.exe101_bioverse.auth.enums.UserStatus;
 import com.example.exe101_bioverse.auth.mapper.UserMapper;
+import com.example.exe101_bioverse.auth.repository.AdminUserQueryRepository;
 import com.example.exe101_bioverse.auth.repository.RoleRepository;
 import com.example.exe101_bioverse.auth.repository.UserRepository;
 import com.example.exe101_bioverse.auth.repository.UserSessionRepository;
+import com.example.exe101_bioverse.auth.repository.UserSpecifications;
 import com.example.exe101_bioverse.auth.service.AdminUserService;
 import com.example.exe101_bioverse.auth.service.JwtService;
 import com.example.exe101_bioverse.auth.service.TokenBlacklistService;
 import com.example.exe101_bioverse.common.exception.AppException;
 import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.common.response.PageResponse;
-import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +29,12 @@ import java.time.ZoneId;
 @Service
 public class AdminUserServiceImpl implements AdminUserService {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminUserServiceImpl.class);
     private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     private static final String ADMIN_ROLE = "ADMIN";
 
     private final UserRepository userRepository;
+    private final AdminUserQueryRepository adminUserQueryRepository;
     private final RoleRepository roleRepository;
     private final UserSessionRepository userSessionRepository;
     private final TokenBlacklistService tokenBlacklistService;
@@ -38,6 +43,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     public AdminUserServiceImpl(
             UserRepository userRepository,
+            AdminUserQueryRepository adminUserQueryRepository,
             RoleRepository roleRepository,
             UserSessionRepository userSessionRepository,
             TokenBlacklistService tokenBlacklistService,
@@ -45,6 +51,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             UserMapper userMapper
     ) {
         this.userRepository = userRepository;
+        this.adminUserQueryRepository = adminUserQueryRepository;
         this.roleRepository = roleRepository;
         this.userSessionRepository = userSessionRepository;
         this.tokenBlacklistService = tokenBlacklistService;
@@ -55,10 +62,16 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<UserResponse> listUsers(String q, UserStatus status, String role, Pageable pageable) {
-        Page<UserResponse> page = userRepository
-                .search(status, blankToNull(role), blankToNull(q), pageable)
-                .map(userMapper::toResponse);
-        return PageResponse.from(page);
+        try {
+            return adminUserQueryRepository.search(q, status, role, pageable);
+        } catch (RuntimeException ex) {
+            log.error("JDBC admin user list failed, falling back to JPA criteria: {}", ex.getMessage());
+            return PageResponse.from(
+                    userRepository
+                            .findAll(UserSpecifications.adminList(q, status, role), pageable)
+                            .map(userMapper::toResponse)
+            );
+        }
     }
 
     @Override

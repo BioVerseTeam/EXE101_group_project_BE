@@ -20,10 +20,12 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.net.URI;
@@ -74,11 +76,13 @@ public class R2StorageServiceImpl implements R2StorageService {
 
     @Override
     public List<ModelAssetResponse> listModels() {
-        S3Client client = requireClient();
+        if (s3Client == null) {
+            return List.of();
+        }
         try {
             List<ModelAssetResponse> models = new ArrayList<>();
             var request = ListObjectsV2Request.builder().bucket(bucket).build();
-            client.listObjectsV2Paginator(request).stream()
+            s3Client.listObjectsV2Paginator(request).stream()
                     .flatMap(page -> page.contents().stream())
                     .filter(object -> object.key() != null && !object.key().endsWith("/"))
                     .forEach(object -> models.add(new ModelAssetResponse(
@@ -89,7 +93,10 @@ public class R2StorageServiceImpl implements R2StorageService {
             return models;
         } catch (S3Exception ex) {
             log.error("Failed to list R2 objects: {}", ex.getMessage());
-            throw new AppException(ErrorCode.STORAGE_ERROR);
+            return List.of();
+        } catch (RuntimeException ex) {
+            log.error("Failed to list R2 objects: {}", ex.getMessage());
+            return List.of();
         }
     }
 
@@ -132,6 +139,31 @@ public class R2StorageServiceImpl implements R2StorageService {
             builder.contentLength(contentLength);
         }
         return builder.body(body);
+    }
+
+    @Override
+    public ModelAssetResponse uploadObject(String objectKey, byte[] bytes, String contentType) {
+        String key = normalizeKey(objectKey);
+        S3Client client = requireClient();
+        try {
+            client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType(contentType)
+                            .contentLength((long) bytes.length)
+                            .build(),
+                    RequestBody.fromBytes(bytes)
+            );
+        } catch (S3Exception ex) {
+            log.error("Failed to upload R2 object {}: {}", key, ex.getMessage());
+            throw new AppException(ErrorCode.STORAGE_ERROR);
+        }
+        return new ModelAssetResponse(
+                key,
+                (long) bytes.length,
+                "/api/models/" + UriUtils.encodePath(key, StandardCharsets.UTF_8)
+        );
     }
 
     @PreDestroy

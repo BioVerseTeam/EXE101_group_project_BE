@@ -2,17 +2,17 @@ package com.example.exe101_bioverse.auth.repository;
 
 import com.example.exe101_bioverse.auth.entity.User;
 import com.example.exe101_bioverse.auth.enums.UserStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     @EntityGraph(attributePaths = "role")
     Optional<User> findByEmail(String email);
@@ -29,26 +29,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRole_CodeAndStatus(String roleCode, UserStatus status);
 
+    long countByRole_Code(String roleCode);
+
+    long countByStatus(UserStatus status);
+
+    long countByCreatedAtGreaterThanEqual(LocalDateTime from);
+
+    @Query(value = """
+            SELECT to_char(date_trunc('month', created_at), 'YYYY-MM') AS ym,
+                   COUNT(*) AS total
+            FROM users
+            GROUP BY 1
+            ORDER BY 1
+            """, nativeQuery = true)
+    List<Object[]> countCreatedByMonth();
+
     boolean existsByRole_Id(Long roleId);
 
     @Query("SELECT u.id FROM User u WHERE u.role.id = :roleId")
     List<Long> findIdsByRoleId(@Param("roleId") Long roleId);
-
-    @EntityGraph(attributePaths = "role")
-    @Query("""
-            SELECT u FROM User u
-            WHERE (:status IS NULL OR u.status = :status)
-              AND (:roleCode IS NULL OR u.role.code = :roleCode)
-              AND (
-                    :q IS NULL
-                    OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%'))
-                    OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :q, '%'))
-                  )
-            """)
-    Page<User> search(
-            @Param("status") UserStatus status,
-            @Param("roleCode") String roleCode,
-            @Param("q") String q,
-            Pageable pageable
-    );
 }

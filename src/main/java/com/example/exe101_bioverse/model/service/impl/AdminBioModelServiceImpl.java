@@ -10,6 +10,8 @@ import com.example.exe101_bioverse.model.dto.response.ModelDetailResponse;
 import com.example.exe101_bioverse.model.entity.BioModel;
 import com.example.exe101_bioverse.model.repository.BioModelRepository;
 import com.example.exe101_bioverse.model.service.AdminBioModelService;
+import com.example.exe101_bioverse.model.service.BioLabService;
+import com.example.exe101_bioverse.model.service.BioModelCategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminBioModelServiceImpl implements AdminBioModelService {
 
     private final BioModelRepository bioModelRepository;
+    private final BioModelCategoryService categoryService;
+    private final BioLabService labService;
 
-    public AdminBioModelServiceImpl(BioModelRepository bioModelRepository) {
+    public AdminBioModelServiceImpl(
+            BioModelRepository bioModelRepository,
+            BioModelCategoryService categoryService,
+            BioLabService labService
+    ) {
         this.bioModelRepository = bioModelRepository;
+        this.categoryService = categoryService;
+        this.labService = labService;
     }
 
     @Override
@@ -48,15 +58,18 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
 
     @Override
     public ModelDetailResponse createModel(CreateModelRequest request) {
-        // Kiểm tra slug trùng
-        if (request.getSlug() != null && bioModelRepository.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.INVALID_DATA, "Slug đã tồn tại: " + request.getSlug());
+        String slug = request.getSlug();
+        if (slug != null && !slug.isBlank()) {
+            slug = slug.trim();
+            if (bioModelRepository.existsBySlug(slug)) {
+                slug = slug + "-" + Long.toString(System.currentTimeMillis(), 36);
+            }
         }
 
         BioModel model = BioModel.builder()
                 .name(request.getName())
                 .nameEn(request.getNameEn())
-                .slug(request.getSlug())
+                .slug(slug)
                 .scientificName(request.getScientificName())
                 .category(request.getCategory())
                 .description(request.getDescription())
@@ -64,7 +77,7 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
                 .characteristics(request.getCharacteristics())
                 .classification(request.getClassification())
                 .funFacts(request.getFunFacts())
-                .grade(request.getGrade())
+                .grade(request.getGrade() != null && request.getGrade() == 0 ? null : request.getGrade())
                 .subject(request.getSubject() != null ? request.getSubject() : "BIOLOGY")
                 .badgeText(request.getBadgeText())
                 .actionText(request.getActionText() != null ? request.getActionText() : "Khám phá ngay")
@@ -79,10 +92,13 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
                 .cameraPosition(request.getCameraPosition())
                 .annotations(request.getAnnotations())
                 .isFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .sortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0)
                 .lessonId(request.getLessonId())
                 .build();
 
+        categoryService.ensureNamed(request.getCategory());
+        labService.ensureCoded(request.getTargetMode(), request.getName());
         model = bioModelRepository.save(model);
         return ModelDetailResponse.from(model);
     }
@@ -108,7 +124,9 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
         if (request.getCharacteristics() != null) model.setCharacteristics(request.getCharacteristics());
         if (request.getClassification() != null) model.setClassification(request.getClassification());
         if (request.getFunFacts() != null) model.setFunFacts(request.getFunFacts());
-        if (request.getGrade() != null) model.setGrade(request.getGrade());
+        if (request.getGrade() != null) {
+            model.setGrade(request.getGrade() == 0 ? null : request.getGrade());
+        }
         if (request.getSubject() != null) model.setSubject(request.getSubject());
         if (request.getBadgeText() != null) model.setBadgeText(request.getBadgeText());
         if (request.getActionText() != null) model.setActionText(request.getActionText());
@@ -127,6 +145,12 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
         if (request.getSortOrder() != null) model.setSortOrder(request.getSortOrder());
         if (request.getLessonId() != null) model.setLessonId(request.getLessonId());
 
+        if (request.getCategory() != null) {
+            categoryService.ensureNamed(request.getCategory());
+        }
+        if (request.getTargetMode() != null && !request.getTargetMode().isBlank()) {
+            labService.ensureCoded(request.getTargetMode(), request.getName() != null ? request.getName() : model.getName());
+        }
         model = bioModelRepository.save(model);
         return ModelDetailResponse.from(model);
     }
