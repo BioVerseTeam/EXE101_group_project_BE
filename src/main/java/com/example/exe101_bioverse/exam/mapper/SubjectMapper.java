@@ -18,8 +18,8 @@ public interface SubjectMapper {
 
     @Mapping(target = "semesterId", source = "semester.id")
     @Mapping(target = "semesterName", source = "semester.name")
-    @Mapping(target = "classId", source = "semester.classEntity.id")
-    @Mapping(target = "className", source = "semester.classEntity.name")
+    @Mapping(target = "classId", source = "semester.grade.id")
+    @Mapping(target = "className", source = "semester.grade.name")
     @Mapping(target = "examCount", expression = "java(subject.getExams() != null ? subject.getExams().size() : 0)")
     SubjectResponse toResponse(Subject subject);
 }

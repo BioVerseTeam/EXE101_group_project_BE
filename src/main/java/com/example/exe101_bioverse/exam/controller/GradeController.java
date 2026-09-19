@@ -3,7 +3,7 @@ package com.example.exe101_bioverse.exam.controller;
 import com.example.exe101_bioverse.common.response.ApiResponse;
 import com.example.exe101_bioverse.exam.dto.request.ClassRequest;
 import com.example.exe101_bioverse.exam.dto.response.ClassResponse;
-import com.example.exe101_bioverse.exam.service.ClassService;
+import com.example.exe101_bioverse.exam.service.GradeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/classes")
-public class ClassController {
+public class GradeController {
 
     @Autowired
-    private ClassService classService;
+    private GradeService classService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ClassResponse>> createClass(@RequestBody ClassRequest request) {

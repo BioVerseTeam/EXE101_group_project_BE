@@ -5,7 +5,7 @@ import com.example.exe101_bioverse.exam.dto.response.ClassResponse;
 
 import java.util.List;
 
-public interface ClassService {
+public interface GradeService {
     ClassResponse createClass(ClassRequest request);
     ClassResponse updateClass(Long id, ClassRequest request);
     ClassResponse getClassById(Long id);

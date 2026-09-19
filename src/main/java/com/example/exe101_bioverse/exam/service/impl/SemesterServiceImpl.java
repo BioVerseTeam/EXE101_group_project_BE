@@ -2,13 +2,13 @@ package com.example.exe101_bioverse.exam.service.impl;
 
 import com.example.exe101_bioverse.exam.dto.request.SemesterRequest;
 import com.example.exe101_bioverse.exam.dto.response.SemesterResponse;
-import com.example.exe101_bioverse.exam.entity.ClassEntity;
+import com.example.exe101_bioverse.exam.entity.Grade;
 import com.example.exe101_bioverse.exam.entity.Semester;
 import com.example.exe101_bioverse.exam.mapper.SemesterMapper;
-import com.example.exe101_bioverse.exam.repository.ClassRepository;
+import com.example.exe101_bioverse.exam.repository.GradeRepository;
 import com.example.exe101_bioverse.exam.repository.SemesterRepository;
 import com.example.exe101_bioverse.exam.service.SemesterService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,16 +16,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SemesterServiceImpl implements SemesterService {
 
-    @Autowired
-    private SemesterRepository semesterRepository;
-
-    @Autowired
-    private ClassRepository classRepository;
-
-    @Autowired
-    private SemesterMapper semesterMapper;
+    private final SemesterRepository semesterRepository;
+    private final GradeRepository classRepository;
+    private final SemesterMapper semesterMapper;
 
     @Override
     @Transactional
@@ -33,11 +29,11 @@ public class SemesterServiceImpl implements SemesterService {
         if (request.getClassId() == null) {
             throw new IllegalArgumentException("classId không được để trống.");
         }
-        ClassEntity classEntity = classRepository.findById(request.getClassId())
+        Grade grade = classRepository.findById(request.getClassId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + request.getClassId()));
 
         Semester semester = semesterMapper.toEntity(request);
-        semester.setClassEntity(classEntity);
+        semester.setGrade(grade);
         semester.setCreatedDate(LocalDateTime.now());
         semester.setUpdatedDate(LocalDateTime.now());
 
@@ -51,10 +47,10 @@ public class SemesterServiceImpl implements SemesterService {
         Semester semester = semesterRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + id));
 
-        if (request.getClassId() != null && !request.getClassId().equals(semester.getClassEntity().getId())) {
-            ClassEntity classEntity = classRepository.findById(request.getClassId())
+        if (request.getClassId() != null && !request.getClassId().equals(semester.getGrade().getId())) {
+            Grade grade = classRepository.findById(request.getClassId())
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + request.getClassId()));
-            semester.setClassEntity(classEntity);
+            semester.setGrade(grade);
         }
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
             semester.setName(request.getName());
@@ -82,7 +78,7 @@ public class SemesterServiceImpl implements SemesterService {
     @Override
     @Transactional(readOnly = true)
     public List<SemesterResponse> getSemestersByClassId(Long classId) {
-        return semesterRepository.findByClassEntityIdOrderBySemesterOrderAsc(classId).stream()
+        return semesterRepository.findByGradeIdOrderBySemesterOrderAsc(classId).stream()
                 .map(semesterMapper::toResponse)
                 .toList();
     }

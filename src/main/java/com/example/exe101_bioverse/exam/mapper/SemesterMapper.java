@@ -10,15 +10,15 @@ import org.mapstruct.Mapping;
 public interface SemesterMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "classEntity", ignore = true)
+    @Mapping(target = "grade", ignore = true)
     @Mapping(target = "subjects", ignore = true)
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "updatedDate", ignore = true)
     Semester toEntity(SemesterRequest request);
 
-    @Mapping(target = "classId", source = "classEntity.id")
-    @Mapping(target = "className", source = "classEntity.name")
-    @Mapping(target = "classGrade", source = "classEntity.grade")
+    @Mapping(target = "classId", source = "grade.id")
+    @Mapping(target = "className", source = "grade.name")
+    @Mapping(target = "classGrade", source = "grade.grade")
     @Mapping(target = "subjectCount", expression = "java(semester.getSubjects() != null ? semester.getSubjects().size() : 0)")
     SemesterResponse toResponse(Semester semester);
 }

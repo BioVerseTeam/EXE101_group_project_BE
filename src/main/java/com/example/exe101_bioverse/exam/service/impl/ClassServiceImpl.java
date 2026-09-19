@@ -2,25 +2,24 @@ package com.example.exe101_bioverse.exam.service.impl;
 
 import com.example.exe101_bioverse.exam.dto.request.ClassRequest;
 import com.example.exe101_bioverse.exam.dto.response.ClassResponse;
-import com.example.exe101_bioverse.exam.entity.ClassEntity;
-import com.example.exe101_bioverse.exam.mapper.ClassMapper;
-import com.example.exe101_bioverse.exam.repository.ClassRepository;
-import com.example.exe101_bioverse.exam.service.ClassService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.exe101_bioverse.exam.entity.Grade;
+import com.example.exe101_bioverse.exam.mapper.GradeMapper;
+import com.example.exe101_bioverse.exam.repository.GradeRepository;
+import com.example.exe101_bioverse.exam.service.GradeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class ClassServiceImpl implements ClassService {
+@RequiredArgsConstructor
+public class ClassServiceImpl implements GradeService {
 
-    @Autowired
-    private ClassRepository classRepository;
-
-    @Autowired
-    private ClassMapper classMapper;
+    private final GradeRepository classRepository;
+    private final GradeMapper classMapper;
 
     @Override
     @Transactional
@@ -28,61 +27,60 @@ public class ClassServiceImpl implements ClassService {
         if (request.getGrade() == null) {
             throw new IllegalArgumentException("Khối lớp (grade) không được để trống.");
         }
-        if (classRepository.existsByGrade(request.getGrade())) {
-            throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại.");
+        if (classRepository.findByGrade(request.getGrade()).isPresent()) {
+            throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
         }
-        ClassEntity entity = classMapper.toEntity(request);
+
+        Grade entity = classMapper.toEntity(request);
         entity.setCreatedDate(LocalDateTime.now());
         entity.setUpdatedDate(LocalDateTime.now());
-        ClassEntity saved = classRepository.save(entity);
+        Grade saved = classRepository.save(entity);
         return classMapper.toResponse(saved);
     }
 
     @Override
     @Transactional
     public ClassResponse updateClass(Long id, ClassRequest request) {
-        ClassEntity entity = classRepository.findById(id)
+        Grade entity = classRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + id));
 
-        if (request.getGrade() != null && !request.getGrade().equals(entity.getGrade())) {
-            if (classRepository.existsByGrade(request.getGrade())) {
-                throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại.");
-            }
-            entity.setGrade(request.getGrade());
-        }
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
             entity.setName(request.getName());
+        }
+        if (request.getGrade() != null && !request.getGrade().equals(entity.getGrade())) {
+            if (classRepository.findByGrade(request.getGrade()).isPresent()) {
+                throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
+            }
+            entity.setGrade(request.getGrade());
         }
         if (request.getDescription() != null) {
             entity.setDescription(request.getDescription());
         }
         entity.setUpdatedDate(LocalDateTime.now());
-        ClassEntity saved = classRepository.save(entity);
+
+        Grade saved = classRepository.save(entity);
         return classMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ClassResponse getClassById(Long id) {
-        ClassEntity entity = classRepository.findById(id)
+        Grade entity = classRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + id));
         return classMapper.toResponse(entity);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ClassResponse getClassByGrade(Integer grade) {
-        ClassEntity entity = classRepository.findByGrade(grade)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với grade: " + grade));
+        Grade entity = classRepository.findByGrade(grade)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp: " + grade));
         return classMapper.toResponse(entity);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ClassResponse> getAllClasses() {
         return classRepository.findAllByOrderByGradeAsc().stream()
                 .map(classMapper::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
