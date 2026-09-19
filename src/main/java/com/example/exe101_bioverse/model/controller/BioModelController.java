@@ -2,6 +2,7 @@ package com.example.exe101_bioverse.model.controller;
 
 import com.example.exe101_bioverse.common.response.ApiResponse;
 import com.example.exe101_bioverse.common.response.PageResponse;
+import com.example.exe101_bioverse.model.dto.response.LabResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelDetailResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelSummaryResponse;
 import com.example.exe101_bioverse.model.service.BioModelService;
@@ -61,10 +62,16 @@ public class BioModelController {
 
     @GetMapping("/categories")
     @Operation(summary = "Lấy danh sách thể loại mô hình",
-               description = "Trả về các category riêng biệt để đổ vào thanh lọc trên UI. Có thể lọc theo môn học.")
+               description = "Trả về các loại mẫu admin đang bật. Có thể lọc theo môn học.")
     public ResponseEntity<ApiResponse<List<String>>> getCategories(
             @Parameter(description = "Môn học: BIOLOGY, CHEMISTRY, PHYSICS") @RequestParam(required = false) String subject
     ) {
         return ResponseEntity.ok(ApiResponse.success(bioModelService.getCategories(subject)));
+    }
+
+    @GetMapping("/labs")
+    @Operation(summary = "Lấy danh sách lab 3D đang mở")
+    public ResponseEntity<ApiResponse<List<LabResponse>>> getLabs() {
+        return ResponseEntity.ok(ApiResponse.success(bioModelService.getLabs()));
     }
 }

@@ -4,7 +4,8 @@ import com.example.exe101_bioverse.auth.enums.GenderType;
 import com.example.exe101_bioverse.auth.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,8 +46,8 @@ public class User {
     private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(columnDefinition = "gender_type")
-    @ColumnTransformer(write = "?::gender_type")
     private GenderType gender;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -54,8 +55,8 @@ public class User {
     private Role role;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false, columnDefinition = "user_status")
-    @ColumnTransformer(write = "?::user_status")
     @Builder.Default
     private UserStatus status = UserStatus.ACTIVE;
 
