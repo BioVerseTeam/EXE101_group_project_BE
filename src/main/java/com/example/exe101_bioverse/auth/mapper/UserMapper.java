@@ -9,5 +9,9 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "role", source = "role.code")
+    @Mapping(target = "currentStreak", ignore = true)
+    @Mapping(target = "longestStreak", ignore = true)
+    @Mapping(target = "lastCheckInDate", ignore = true)
+    @Mapping(target = "checkedInToday", ignore = true)
     UserResponse toResponse(User user);
 }

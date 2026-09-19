@@ -35,7 +35,7 @@ public class ProfileController {
     }
 
     @GetMapping
-    @Operation(summary = "Get the current user's profile")
+    @Operation(summary = "Get the current user's profile and record today's streak check-in")
     public ResponseEntity<ApiResponse<UserResponse>> getMe(@AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.ok(ApiResponse.success(profileService.getMe(principal.getId())));
     }

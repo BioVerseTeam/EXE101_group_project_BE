@@ -17,6 +17,8 @@ import com.example.exe101_bioverse.auth.service.ProfileService;
 import com.example.exe101_bioverse.auth.service.TokenBlacklistService;
 import com.example.exe101_bioverse.common.exception.AppException;
 import com.example.exe101_bioverse.common.exception.ErrorCode;
+import com.example.exe101_bioverse.streak.dto.response.StreakResponse;
+import com.example.exe101_bioverse.streak.service.StreakService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserSessionRepository userSessionRepository;
     private final TokenBlacklistService tokenBlacklistService;
     private final JwtService jwtService;
+    private final StreakService streakService;
 
     public ProfileServiceImpl(
             UserRepository userRepository,
@@ -46,7 +49,8 @@ public class ProfileServiceImpl implements ProfileService {
             MailService mailService,
             UserSessionRepository userSessionRepository,
             TokenBlacklistService tokenBlacklistService,
-            JwtService jwtService
+            JwtService jwtService,
+            StreakService streakService
     ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
@@ -56,12 +60,16 @@ public class ProfileServiceImpl implements ProfileService {
         this.userSessionRepository = userSessionRepository;
         this.tokenBlacklistService = tokenBlacklistService;
         this.jwtService = jwtService;
+        this.streakService = streakService;
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserResponse getMe(Long userId) {
-        return userMapper.toResponse(requireActiveUser(userId));
+        UserResponse response = userMapper.toResponse(requireActiveUser(userId));
+        StreakResponse streak = streakService.checkIn(userId);
+        streakService.applyTo(response, streak);
+        return response;
     }
 
     @Override
@@ -93,7 +101,9 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         user.setUpdatedAt(LocalDateTime.now(VN_ZONE));
-        return userMapper.toResponse(userRepository.save(user));
+        UserResponse response = userMapper.toResponse(userRepository.save(user));
+        streakService.applyTo(response, streakService.getStreak(userId));
+        return response;
     }
 
     @Override

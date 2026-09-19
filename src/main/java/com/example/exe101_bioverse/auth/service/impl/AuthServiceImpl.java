@@ -12,6 +12,7 @@ import com.example.exe101_bioverse.auth.dto.request.VerifyOtpRequest;
 import com.example.exe101_bioverse.auth.dto.response.AuthResponse;
 import com.example.exe101_bioverse.auth.dto.response.OtpSentResponse;
 import com.example.exe101_bioverse.auth.dto.response.ResetTokenResponse;
+import com.example.exe101_bioverse.auth.dto.response.UserResponse;
 import com.example.exe101_bioverse.auth.entity.Role;
 import com.example.exe101_bioverse.auth.entity.User;
 import com.example.exe101_bioverse.auth.entity.UserSession;
@@ -28,6 +29,7 @@ import com.example.exe101_bioverse.auth.service.OtpService;
 import com.example.exe101_bioverse.auth.service.TokenBlacklistService;
 import com.example.exe101_bioverse.common.exception.AppException;
 import com.example.exe101_bioverse.common.exception.ErrorCode;
+import com.example.exe101_bioverse.streak.service.StreakService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final OtpService otpService;
     private final MailService mailService;
+    private final StreakService streakService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -67,7 +70,8 @@ public class AuthServiceImpl implements AuthService {
             TokenBlacklistService tokenBlacklistService,
             UserMapper userMapper,
             OtpService otpService,
-            MailService mailService
+            MailService mailService,
+            StreakService streakService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -78,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
         this.userMapper = userMapper;
         this.otpService = otpService;
         this.mailService = mailService;
+        this.streakService = streakService;
     }
 
     @Override
@@ -137,6 +142,7 @@ public class AuthServiceImpl implements AuthService {
 
         user = userRepository.save(user);
         otpService.deletePendingRegistration(email);
+        streakService.checkIn(user.getId());
         return issueTokens(user, httpRequest);
     }
 
@@ -237,6 +243,7 @@ public class AuthServiceImpl implements AuthService {
         user.setLastLoginAt(LocalDateTime.now(VN_ZONE));
         user.setUpdatedAt(LocalDateTime.now(VN_ZONE));
         user = userRepository.save(user);
+        streakService.checkIn(user.getId());
 
         return issueTokens(user, httpRequest);
     }
@@ -316,12 +323,15 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         userSessionRepository.save(session);
 
+        UserResponse userResponse = userMapper.toResponse(user);
+        streakService.applyTo(userResponse, streakService.getStreak(user.getId()));
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType(TOKEN_TYPE)
                 .expiresIn(jwtService.getAccessTokenExpirationMs() / 1000)
-                .user(userMapper.toResponse(user))
+                .user(userResponse)
                 .build();
     }
 

@@ -28,4 +28,8 @@ public class UserResponse {
     private Boolean emailVerified;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
+    private Integer currentStreak;
+    private Integer longestStreak;
+    private LocalDate lastCheckInDate;
+    private Boolean checkedInToday;
 }
