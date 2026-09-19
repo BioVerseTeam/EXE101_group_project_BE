@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- V17: SEED EXAM DATA FOR KHTN GRADES 6 TO 9 (SEMESTERS 1 & 2)
 -- Tổng hợp dữ liệu đề thi, câu hỏi trắc nghiệm, đáp án và ảnh minh họa
 -- Áp dụng tự động thông qua Flyway Migration hoặc import trực tiếp vào PostgreSQL
@@ -29,25 +29,25 @@ DECLARE
     v_point DOUBLE PRECISION := 0.25; -- Đề 40 câu, thang điểm 10.0
 BEGIN
     -- 1. ĐẢM BẢO DANH MỤC: KHỐI LỚP 6
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 6;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 6;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 6', 6, 'Chương trình Khoa học tự nhiên THCS Lớp 6', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. ĐẢM BẢO DANH MỤC: HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 6', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. ĐẢM BẢO DANH MỤC: MÔN KHTN 6
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 6', 'KHTN6_HK1', 'Môn Khoa học Tự nhiên Lớp 6 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -954,25 +954,25 @@ DECLARE
     v_point DOUBLE PRECISION := 0.25; -- Đề 40 câu, thang điểm 10.0
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 6
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 6;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 6;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 6', 6, 'Chương trình Khoa học tự nhiên THCS Lớp 6', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 6', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 6
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 6', 'KHTN6_HK1', 'Môn Khoa học Tự nhiên Lớp 6 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -1906,25 +1906,25 @@ DECLARE
     v_point DOUBLE PRECISION := 0.25; -- Đề 40 câu, thang điểm 10.0
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 6
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 6;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 6;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 6', 6, 'Chương trình Khoa học tự nhiên THCS Lớp 6', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 6', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 6 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 6', 'KHTN6_HK1', 'Môn Khoa học Tự nhiên Lớp 6 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -3631,25 +3631,25 @@ DECLARE
     v_point DOUBLE PRECISION := 0.5; -- Đề 20 câu, thang điểm 10.0
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 6
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 6;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 6;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 6', 6, 'Chương trình Khoa học tự nhiên THCS Lớp 6', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 6', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 6 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 6', 'KHTN6_HK2', 'Môn Khoa học Tự nhiên Lớp 6 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -4294,25 +4294,25 @@ DECLARE
     v_point_28 DOUBLE PRECISION := ROUND((10.0 / 28.0)::numeric, 4); -- ~0.3571 điểm/câu cho đề 28 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 6
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 6;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 6;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 6', 6, 'Chương trình Khoa học tự nhiên THCS Lớp 6', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 6', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 6 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN6_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 6', 'KHTN6_HK2', 'Môn Khoa học Tự nhiên Lớp 6 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -5515,25 +5515,25 @@ DECLARE
     v_point_30 DOUBLE PRECISION := ROUND((10.0 / 30.0)::numeric, 4); -- ~0.3333 điểm/câu cho đề 30 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 7
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 7;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 7;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 7', 7, 'Chương trình Khoa học tự nhiên THCS Lớp 7', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 7', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 7 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 7', 'KHTN7_HK1', 'Môn Khoa học Tự nhiên Lớp 7 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -6198,25 +6198,25 @@ DECLARE
     v_point_30 DOUBLE PRECISION := ROUND((10.0 / 30.0)::numeric, 4); -- ~0.3333 điểm/câu cho đề 30 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 7
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 7;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 7;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 7', 7, 'Chương trình Khoa học tự nhiên THCS Lớp 7', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 7', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 7 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 7', 'KHTN7_HK1', 'Môn Khoa học Tự nhiên Lớp 7 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -6877,25 +6877,25 @@ DECLARE
     v_point_20 DOUBLE PRECISION := 0.5; -- Đề 20 câu, thang điểm 10.0
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 7
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 7;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 7;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 7', 7, 'Chương trình Khoa học tự nhiên THCS Lớp 7', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 7', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 7 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 7', 'KHTN7_HK2', 'Môn Khoa học Tự nhiên Lớp 7 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -7351,25 +7351,25 @@ DECLARE
     v_point_28 DOUBLE PRECISION := ROUND((10.0 / 28.0)::numeric, 4); -- ~0.3571 điểm/câu cho đề 28 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 7
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 7;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 7;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 7', 7, 'Chương trình Khoa học tự nhiên THCS Lớp 7', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 7', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 7 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN7_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 7', 'KHTN7_HK2', 'Môn Khoa học Tự nhiên Lớp 7 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -7980,25 +7980,25 @@ DECLARE
     v_point_12 DOUBLE PRECISION := ROUND((10.0 / 12.0)::numeric, 4); -- ~0.8333 điểm/câu cho đề 12 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 8
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 8;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 8;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 8', 8, 'Chương trình Khoa học tự nhiên THCS Lớp 8', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 8', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 8 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 8', 'KHTN8_HK1', 'Môn Khoa học Tự nhiên Lớp 8 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -8290,25 +8290,25 @@ DECLARE
     v_point_30 DOUBLE PRECISION := ROUND((10.0 / 30.0)::numeric, 4); -- ~0.3333 điểm/câu cho đề 30 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 8
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 8;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 8;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 8', 8, 'Chương trình Khoa học tự nhiên THCS Lớp 8', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 8', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 8 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 8', 'KHTN8_HK1', 'Môn Khoa học Tự nhiên Lớp 8 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -8959,25 +8959,25 @@ DECLARE
     v_point_30 DOUBLE PRECISION := ROUND((10.0 / 30.0)::numeric, 4); -- ~0.3333 điểm/câu cho đề 30 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 8
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 8;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 8;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 8', 8, 'Chương trình Khoa học tự nhiên THCS Lớp 8', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 8', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 8 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 8', 'KHTN8_HK2', 'Môn Khoa học Tự nhiên Lớp 8 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -9632,25 +9632,25 @@ DECLARE
     v_point_20 DOUBLE PRECISION := 0.5; -- Đề 20 câu, thang điểm 10.0
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 8
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 8;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 8;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 8', 8, 'Chương trình Khoa học tự nhiên THCS Lớp 8', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 8', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 8 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN8_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 8', 'KHTN8_HK2', 'Môn Khoa học Tự nhiên Lớp 8 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -10103,25 +10103,25 @@ DECLARE
     v_point_16 DOUBLE PRECISION := 0.625; -- Đề 16 câu, thang điểm 10.0 (10 / 16 = 0.625)
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 9
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 9;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 9;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 9', 9, 'Chương trình Khoa học tự nhiên THCS Lớp 9', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 9', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 9 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 9', 'KHTN9_HK1', 'Môn Khoa học Tự nhiên Lớp 9 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -10493,25 +10493,25 @@ DECLARE
     v_point_40 DOUBLE PRECISION := 0.25; -- 0.25 điểm/câu cho đề 40 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 9
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 9;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 9;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 9', 9, 'Chương trình Khoa học tự nhiên THCS Lớp 9', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 1
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 1;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 1;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 1', 1, 'Học kỳ 1 năm học Lớp 9', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 9 HỌC KỲ 1
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK1';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK1';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 9', 'KHTN9_HK1', 'Môn Khoa học Tự nhiên Lớp 9 - Học kỳ 1', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -11143,25 +11143,25 @@ DECLARE
     v_point_40 DOUBLE PRECISION := 0.25; -- 0.25 điểm/câu cho đề 40 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 9
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 9;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 9;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 9', 9, 'Chương trình Khoa học tự nhiên THCS Lớp 9', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 9', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 9 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 9', 'KHTN9_HK2', 'Môn Khoa học Tự nhiên Lớp 9 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
@@ -11793,25 +11793,25 @@ DECLARE
     v_point_12 DOUBLE PRECISION := ROUND((10.0 / 12.0)::numeric, 4); -- ~0.8333 điểm/câu cho đề 12 câu
 BEGIN
     -- 1. LẤY HOẶC TẠO KHỐI LỚP 9
-    SELECT id INTO v_class_id FROM exam_classes WHERE grade = 9;
+    SELECT id INTO v_class_id FROM grades WHERE grade = 9;
     IF v_class_id IS NULL THEN
-        INSERT INTO exam_classes (name, grade, description, created_date, updated_date)
+        INSERT INTO grades (name, grade, description, created_date, updated_date)
         VALUES ('Lớp 9', 9, 'Chương trình Khoa học tự nhiên THCS Lớp 9', NOW(), NOW())
         RETURNING id INTO v_class_id;
     END IF;
 
     -- 2. LẤY HOẶC TẠO HỌC KỲ 2
-    SELECT id INTO v_semester_id FROM exam_semesters WHERE class_id = v_class_id AND semester_order = 2;
+    SELECT id INTO v_semester_id FROM semesters WHERE class_id = v_class_id AND semester_order = 2;
     IF v_semester_id IS NULL THEN
-        INSERT INTO exam_semesters (class_id, name, semester_order, description, created_date, updated_date)
+        INSERT INTO semesters (class_id, name, semester_order, description, created_date, updated_date)
         VALUES (v_class_id, 'Học kỳ 2', 2, 'Học kỳ 2 năm học Lớp 9', NOW(), NOW())
         RETURNING id INTO v_semester_id;
     END IF;
 
     -- 3. LẤY HOẶC TẠO MÔN KHTN 9 HỌC KỲ 2
-    SELECT id INTO v_subject_id FROM exam_subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK2';
+    SELECT id INTO v_subject_id FROM subjects WHERE semester_id = v_semester_id AND code = 'KHTN9_HK2';
     IF v_subject_id IS NULL THEN
-        INSERT INTO exam_subjects (semester_id, name, code, description, created_date, updated_date)
+        INSERT INTO subjects (semester_id, name, code, description, created_date, updated_date)
         VALUES (v_semester_id, 'Khoa học Tự nhiên 9', 'KHTN9_HK2', 'Môn Khoa học Tự nhiên Lớp 9 - Học kỳ 2', NOW(), NOW())
         RETURNING id INTO v_subject_id;
     END IF;
