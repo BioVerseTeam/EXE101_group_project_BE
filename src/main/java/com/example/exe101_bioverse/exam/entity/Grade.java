@@ -8,17 +8,16 @@ import java.util.List;
 
 /**
  * Entity đại diện cho khối lớp học (Lớp 6, 7, 8, 9).
- * Lưu ý: Trong Java từ khóa "class" là từ khóa dành riêng (reserved keyword),
- * do đó class entity được đặt tên là ClassEntity và map với bảng "exam_classes".
+ * Map với bảng "exam_classes".
  */
 @Entity
-@Table(name = "exam_classes")
+@Table(name = "grades")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClassEntity {
+public class Grade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +36,7 @@ public class ClassEntity {
 
     private LocalDateTime updatedDate;
 
-    @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "grade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Semester> semesters;
 
     @PrePersist
