@@ -112,7 +112,7 @@ EXE101_group_project_BE/
     │   │   ├── exam/                            # Phân hệ Bài thi & Câu hỏi
     │   │   │   ├── controller/                  # Exam, Question, Answer, ExamQuestion, Images
     │   │   │   ├── dto/                         # Request/Response đề thi, câu hỏi, đáp án
-    │   │   │   ├── entity/                      # Exam, Question, Answer, ExamQuestion, Images
+    │   │   │   ├── entity/                      # Exam, Question, Answer, ExamQuestion, ClassEntity, Semester, Subject, Images
     │   │   │   ├── enums/                       # ExamType, QuestionType, AnswerType
     │   │   │   ├── mapper/                      # Mapper cho Exam & Question
     │   │   │   ├── repository/                  # Repositories JPA
@@ -168,6 +168,7 @@ Dự án áp dụng cơ chế quản lý cơ sở dữ liệu phiên bản tự 
 | **`V13__users_grade.sql`** | User Grade | Bổ sung trường `grade` (giới hạn từ lớp 6 đến 9) cho bảng `users` |
 | **`V14__add_featured_and_metadata_to_bio_models.sql`** | Bio Models Metadata | Thêm `slug`, `is_featured`, `views_count`, `grade`, `subject`, `badge_text`, `action_text` |
 | **`V15__user_streaks.sql`** | Daily Streak | Bảng `user_streaks` theo dõi chuỗi ngày học liên tục, kỷ lục dài nhất, ngày điểm danh cuối |
+| **`V16__exam_class_semester_subject_schema.sql`** | Exam Taxonomy | Quản lý đề thi theo Khối lớp (`exam_classes`), Học kỳ (`exam_semesters`), Môn học (`exam_subjects`) |
 
 ---
 
@@ -322,11 +323,42 @@ Tất cả các API trả về phản hồi định dạng JSON thống nhất:
 }
 ```
 
-### 6.8. Hệ thống Bài thi & Câu hỏi (Exam & Question)
+### 6.8. Hệ thống Khối lớp, Học kỳ, Môn học & Đề thi (Exam Taxonomy)
 
+#### A. Quản lý Khối lớp (`/api/classes`)
 | Method | Endpoint | Quyền | Mô tả chức năng |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/exams` | Public | Tạo mới một bài kiểm tra |
+| `POST` | `/api/classes` | Public | Tạo khối lớp mới (grade: 6, 7, 8, 9) |
+| `GET` | `/api/classes` | Public | Lấy danh sách tất cả khối lớp sắp xếp theo grade tăng dần |
+| `GET` | `/api/classes/{id}` | Public | Lấy chi tiết khối lớp theo ID |
+| `GET` | `/api/classes/grade/{grade}` | Public | Lấy chi tiết khối lớp theo số lớp (6, 7, 8, 9) |
+| `PUT` | `/api/classes/{id}` | Public | Cập nhật thông tin khối lớp |
+| `DELETE` | `/api/classes/{id}` | Public | Xóa khối lớp |
+
+#### B. Quản lý Học kỳ (`/api/semesters`)
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/semesters` | Public | Tạo học kỳ mới thuộc một khối lớp (`classId`) |
+| `GET` | `/api/semesters` | Public | Lấy danh sách tất cả học kỳ |
+| `GET` | `/api/semesters/{id}` | Public | Lấy chi tiết học kỳ theo ID |
+| `GET` | `/api/semesters/class/{classId}` | Public | Lấy danh sách học kỳ theo ID khối lớp |
+| `PUT` | `/api/semesters/{id}` | Public | Cập nhật thông tin học kỳ |
+| `DELETE` | `/api/semesters/{id}` | Public | Xóa học kỳ |
+
+#### C. Quản lý Môn học theo học kỳ (`/api/subjects`)
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/subjects` | Public | Tạo môn học mới thuộc một học kỳ (`semesterId`) |
+| `GET` | `/api/subjects` | Public | Lấy danh sách tất cả môn học |
+| `GET` | `/api/subjects/{id}` | Public | Lấy chi tiết môn học theo ID |
+| `GET` | `/api/subjects/semester/{semesterId}` | Public | Lấy danh sách môn học theo ID học kỳ |
+| `PUT` | `/api/subjects/{id}` | Public | Cập nhật thông tin môn học |
+| `DELETE` | `/api/subjects/{id}` | Public | Xóa môn học |
+
+#### D. Đề thi & Câu hỏi (`/api/exams`, `/api/questions`...)
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/exams` | Public | Tạo mới một bài kiểm tra (có thể liên kết `subjectId`) |
 | `GET` | `/api/exams` | Public | Lấy danh sách tất cả bài kiểm tra |
 | `GET` | `/api/exams/subject/{subjectName}` | Public | Lọc đề thi theo tên môn học (Sinh học, Hóa học, Vật lý) |
 | `GET` | `/api/exams/type/{type}` | Public | Lọc đề thi theo thể loại (15 phút, 1 tiết, học kỳ) |
