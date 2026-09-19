@@ -11,4 +11,6 @@ public interface R2StorageService {
     List<ModelAssetResponse> listModels();
 
     ResponseEntity<StreamingResponseBody> streamModel(String objectKey);
+
+    ModelAssetResponse uploadObject(String objectKey, byte[] bytes, String contentType);
 }

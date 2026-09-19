@@ -42,7 +42,12 @@ public enum ErrorCode {
     // Storage / 3D models 15xx
     MODEL_NOT_FOUND(1501, "Không tìm thấy model 3D", HttpStatus.NOT_FOUND),
     STORAGE_NOT_CONFIGURED(1502, "Chưa cấu hình Cloudflare R2", HttpStatus.SERVICE_UNAVAILABLE),
-    STORAGE_ERROR(1503, "Không tải được model 3D", HttpStatus.BAD_GATEWAY);
+    STORAGE_ERROR(1503, "Không tải được model 3D", HttpStatus.BAD_GATEWAY),
+    CATEGORY_NOT_FOUND(1504, "Không tìm thấy loại mẫu", HttpStatus.NOT_FOUND),
+    CATEGORY_NAME_EXISTS(1505, "Tên loại mẫu đã tồn tại", HttpStatus.CONFLICT),
+    LAB_NOT_FOUND(1506, "Không tìm thấy lab", HttpStatus.NOT_FOUND),
+    LAB_CODE_EXISTS(1507, "Mã lab đã tồn tại", HttpStatus.CONFLICT),
+    SYSTEM_LAB_PROTECTED(1508, "Không thể xóa hoặc đổi mã lab hệ thống", HttpStatus.FORBIDDEN);
 
     private final int code;
     private final String message;

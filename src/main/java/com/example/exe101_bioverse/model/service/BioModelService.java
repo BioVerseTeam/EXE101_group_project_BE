@@ -1,8 +1,9 @@
 package com.example.exe101_bioverse.model.service;
 
+import com.example.exe101_bioverse.common.response.PageResponse;
+import com.example.exe101_bioverse.model.dto.response.LabResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelDetailResponse;
 import com.example.exe101_bioverse.model.dto.response.ModelSummaryResponse;
-import com.example.exe101_bioverse.common.response.PageResponse;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface BioModelService {
 
     /** Lấy danh sách thể loại (category) riêng biệt, có thể lọc theo môn. */
     List<String> getCategories(String subject);
+
+    /** Lab đang mở cho catalog / nhân mẫu. */
+    List<LabResponse> getLabs();
 }

@@ -52,6 +52,7 @@ public class ModelDetailResponse {
     // Stats
     private Long viewsCount;
     private Boolean isFeatured;
+    private Boolean isActive;
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -85,6 +86,7 @@ public class ModelDetailResponse {
                 .annotations(model.getAnnotations())
                 .viewsCount(model.getViewsCount())
                 .isFeatured(model.getIsFeatured())
+                .isActive(model.getIsActive())
                 .sortOrder(model.getSortOrder())
                 .createdAt(model.getCreatedAt())
                 .updatedAt(model.getUpdatedAt())
