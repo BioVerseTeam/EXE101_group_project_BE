@@ -61,8 +61,10 @@ public class BioModelController {
 
     @GetMapping("/categories")
     @Operation(summary = "Lấy danh sách thể loại mô hình",
-               description = "Trả về các category riêng biệt để đổ vào thanh lọc trên UI.")
-    public ResponseEntity<ApiResponse<List<String>>> getCategories() {
-        return ResponseEntity.ok(ApiResponse.success(bioModelService.getCategories()));
+               description = "Trả về các category riêng biệt để đổ vào thanh lọc trên UI. Có thể lọc theo môn học.")
+    public ResponseEntity<ApiResponse<List<String>>> getCategories(
+            @Parameter(description = "Môn học: BIOLOGY, CHEMISTRY, PHYSICS") @RequestParam(required = false) String subject
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(bioModelService.getCategories(subject)));
     }
 }
