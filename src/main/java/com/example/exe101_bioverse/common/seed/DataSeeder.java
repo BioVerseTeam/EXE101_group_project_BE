@@ -51,7 +51,7 @@ public class DataSeeder implements ApplicationRunner {
         List<SeedUser> seeds = List.of(
                 new SeedUser(
                         "admin@bioverse.com",
-                        "Admin@123456",
+                        "Admin@BioVerse!2026",
                         "Bioverse Admin",
                         "0900000001",
                         null,
