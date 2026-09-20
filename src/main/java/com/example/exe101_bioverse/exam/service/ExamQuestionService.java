@@ -12,4 +12,5 @@ public interface ExamQuestionService {
     ExamQuestionResponse saveExamQuestion(ExamQuestionRequest examQuestionRequest);
     List<ExamQuestion> internalSaveExamQuestion(Exam exam,List<QuestionRequest> questionRequest);
     List<ExamQuestionResponse> getExamQuestionsByExamId(Long examId);
+    List<ExamQuestionResponse> getExamQuestionsByExamIdAndQuestionId(Long examId,Long questionId);
 }

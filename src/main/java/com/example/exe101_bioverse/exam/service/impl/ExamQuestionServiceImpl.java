@@ -69,7 +69,7 @@ public class ExamQuestionServiceImpl implements ExamQuestionService {
             examQuestion.setExam(exam);
             examQuestion.setPoint(questionReq.getPoint());
             examQuestion.setQuestionOrder(questionReq.getQuestionOrder());
-            examQuestion.setQuestion(questionService.internalSaveQuestion(examQuestion, questionReq));
+            examQuestion.setQuestion(questionService.internalSaveQuestion(questionReq));
             examQuestion.setCreatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             examQuestion.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             examQuestionRepository.save(examQuestion);
@@ -80,6 +80,14 @@ public class ExamQuestionServiceImpl implements ExamQuestionService {
     @Override
     public List<ExamQuestionResponse> getExamQuestionsByExamId(Long examId) {
         return examQuestionRepository.findByExamId(examId)
+                .stream()
+                .map(examQuestionMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ExamQuestionResponse> getExamQuestionsByExamIdAndQuestionId(Long examId, Long questionId) {
+        return examQuestionRepository.findByQuestionIdAndExamId(questionId, examId)
                 .stream()
                 .map(examQuestionMapper::toResponse)
                 .toList();

@@ -77,7 +77,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Question internalSaveQuestion(ExamQuestion examQuestion, QuestionRequest questionRequest) {
+    public Question internalSaveQuestion(QuestionRequest questionRequest) {
         Question question = new Question();
         question.setContent(questionRequest.getContent());
         question.setType(questionRequest.getType());
@@ -85,7 +85,6 @@ public class QuestionServiceImpl implements QuestionService {
         question.setDescription(questionRequest.getDescription());
         question.setCreatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         question.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-        question.setExamQuestions(List.of(examQuestion));
         question = questionRepository.save(question);
         question.setAnswers(answerService.internalSaveAnswers(question, questionRequest.getAnswers()));
         question.setQuestionImages(questionImageService.internalSaveQuestionImage(question, questionRequest.getQuestionImageRequests()));
@@ -95,7 +94,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionResponse> getQuestionsByExamId(Long examId) {
-        return List.of();
+        return questionRepository.findByExamId(examId).stream()
+                .map(questionMapper::toResponse)
+                .toList();
     }
 
     @Override
@@ -105,6 +106,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionResponse> getQuestionByType(QuestionType questionType) {
-        return List.of();
+        return questionRepository.findByType(questionType).stream()
+                .map(questionMapper::toResponse)
+                .toList();
     }
 }

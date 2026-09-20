@@ -26,9 +26,10 @@ public class Answer {
 
     private LocalDateTime updatedDate;
 
-    @Column(name = "explanation")
+    @Column(name = "explanation", columnDefinition = "TEXT")
     private String explain;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private boolean isCorrect;

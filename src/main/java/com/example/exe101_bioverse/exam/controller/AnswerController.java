@@ -1,7 +1,30 @@
 package com.example.exe101_bioverse.exam.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import com.example.exe101_bioverse.common.response.ApiResponse;
+import com.example.exe101_bioverse.exam.dto.request.AnswerRequest;
+import com.example.exe101_bioverse.exam.dto.response.AnswerResponse;
+import com.example.exe101_bioverse.exam.service.AnswerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequestMapping("/api/answers")
 public class AnswerController {
+
+    @Autowired
+    private AnswerService answerService;
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<AnswerResponse>> saveAnswer(@RequestBody AnswerRequest answerRequest) {
+        return ResponseEntity.ok(ApiResponse.success(answerService.saveAnswer(answerRequest)));
+    }
+
+    @GetMapping("/question/{questionId}")
+    public ResponseEntity<ApiResponse<List<AnswerResponse>>> getAnswersByQuestionId(
+            @PathVariable("questionId") Long questionId) {
+        return ResponseEntity.ok(ApiResponse.success(answerService.getAnswersByQuestionId(questionId)));
+    }
 }

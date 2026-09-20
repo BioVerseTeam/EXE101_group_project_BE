@@ -52,8 +52,8 @@ public class ExamServiceImpl implements ExamService {
             exam = examMapper.toEntity(examRequest);
             exam.setCreatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
             exam.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
-            exam.setExamQuestions(examQuestionService.internalSaveExamQuestion(exam, examRequest.getQuestions()));
             exam = examRepository.save(exam);
+            exam.setExamQuestions(examQuestionService.internalSaveExamQuestion(exam, examRequest.getQuestions()));
         }
 
         if (returnType == Exam.class) {

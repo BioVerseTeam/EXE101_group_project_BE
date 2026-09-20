@@ -6,7 +6,7 @@ import com.example.exe101_bioverse.exam.entity.Answer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {AnswerImageMapper.class})
 public interface AnswerMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -18,5 +18,6 @@ public interface AnswerMapper {
 
     @Mapping(target = "questionId", source = "question.id")
     @Mapping(target = "answerImageResponses", source = "answerImages")
+    @Mapping(target = "isCorrect", source = "correct")
     AnswerResponse toResponse(Answer answer);
 }

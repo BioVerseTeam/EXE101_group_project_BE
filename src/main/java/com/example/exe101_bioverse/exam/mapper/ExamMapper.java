@@ -6,7 +6,7 @@ import com.example.exe101_bioverse.exam.entity.Exam;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring") //componentModel = "spring" giúp bạn có thể @Autowired mapper này
+@Mapper(componentModel = "spring", uses = {QuestionMapper.class}) //componentModel = "spring" giúp bạn có thể @Autowired mapper này
 public interface ExamMapper {
 
     @Mapping(target = "id", ignore = true)
