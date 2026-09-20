@@ -3,47 +3,146 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${purposeTitle}">Mã OTP Bioverse</title>
+    <meta name="color-scheme" content="light only"/>
+    <title th:text="${purposeTitle}">Mã OTP BioVerse</title>
+    <!--[if !mso]><!-->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Epilogue:wght@700;800&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+    <!--<![endif]-->
 </head>
-<body style="margin:0;padding:0;background:#f3f6f4;font-family:Arial,Helvetica,sans-serif;color:#1f2933;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3f6f4;padding:32px 12px;">
+<body style="margin:0;padding:0;background-color:#fdfbf7;font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif;color:#2d2d2d;-webkit-font-smoothing:antialiased;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    Ting ting! Mã OTP BioVerse của bạn đã sẵn sàng —
+    <span th:text="${otp}">000000</span>
+</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#fdfbf7;background-image:radial-gradient(#dcd5cb 1.5px, transparent 1.5px);background-size:24px 24px;">
     <tr>
-        <td align="center">
-            <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e4eee8;">
+        <td align="center" style="padding:36px 16px;">
+            <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+                <!-- Brand strip -->
                 <tr>
-                    <td style="background:#0f766e;padding:24px 32px;">
-                        <p style="margin:0;font-size:13px;letter-spacing:0.16em;color:#ccfbf1;text-transform:uppercase;">Bioverse</p>
-                        <h1 style="margin:8px 0 0;font-size:22px;color:#ffffff;" th:text="${purposeTitle}">Xác thực OTP</h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding:32px;">
-                        <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">
-                            Xin chào <strong th:text="${fullName}">bạn</strong>,
-                        </p>
-                        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;" th:text="${purposeHint}">
-                            Nhập mã OTP để tiếp tục.
-                        </p>
-                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <td style="padding:0 4px 14px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                             <tr>
-                                <td align="center" style="padding:8px 0 20px;">
-                                    <div style="display:inline-block;background:#ecfdf5;border:1px dashed #0f766e;border-radius:12px;padding:16px 28px;letter-spacing:10px;font-size:32px;font-weight:700;color:#0f766e;"
-                                         th:text="${otp}">000000</div>
+                                <td style="vertical-align:middle;">
+                                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#b71422;border:2px solid #2d2d2d;vertical-align:middle;margin-right:8px;"></span>
+                                    <span style="font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#2d2d2d;vertical-align:middle;">BIOVERSE // SỔ TAY STEM</span>
+                                </td>
+                                <td align="right" style="font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;font-weight:600;color:#76716a;letter-spacing:0.06em;">
+                                    KHỐI 6–9
                                 </td>
                             </tr>
                         </table>
-                        <p style="margin:0 0 8px;font-size:14px;color:#4b5563;">
-                            Mã có hiệu lực trong <strong th:text="${expireMinutes}">10</strong> phút.
-                            Không chia sẻ mã này với bất kỳ ai.
-                        </p>
-                        <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
-                            Nếu bạn không yêu cầu thao tác này, hãy bỏ qua email.
-                        </p>
                     </td>
                 </tr>
+
+                <!-- Sketch card -->
                 <tr>
-                    <td style="padding:16px 32px 24px;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;">
-                        © <span th:text="${year}">2026</span> Bioverse. Email được gửi tự động, vui lòng không trả lời.
+                    <td style="background:#ffffff;border:2.5px solid #2d2d2d;border-radius:18px;box-shadow:5px 5px 0 #2d2d2d;overflow:hidden;">
+                        <!-- Header band -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:22px 28px 18px;border-bottom:2px dashed #e4beba;background:#fcf9f8;">
+                                    <p style="margin:0 0 10px;display:inline-block;padding:4px 12px;background:#d6e3ff;border:1.5px solid #2d2d2d;border-radius:999px;font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;color:#0a4689;text-transform:uppercase;"
+                                       th:text="${purposeBadge}">LAB_VERIFY · OTP</p>
+                                    <h1 style="margin:0;font-family:Epilogue,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:800;color:#1b1c1c;letter-spacing:-0.02em;"
+                                        th:text="${purposeTitle}">Xác thực OTP</h1>
+                                    <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:#5b403e;">
+                                        Ting ting! Mã bay tới rồi — nhập trên trang xác thực BioVerse nhé.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Body -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:28px;">
+                                    <p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#2d2d2d;">
+                                        Xin chào <strong th:text="${fullName}">bạn</strong>,
+                                    </p>
+                                    <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:#5b403e;" th:text="${purposeHint}">
+                                        Nhập mã OTP để tiếp tục.
+                                    </p>
+
+                                    <!-- OTP box -->
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td align="center" style="padding:4px 0 8px;">
+                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border:2.5px solid #2d2d2d;border-radius:14px;box-shadow:3px 3px 0 #2d2d2d;background:#fff9c4;">
+                                                    <tr>
+                                                        <td style="padding:18px 32px;font-family:'Space Grotesk',Arial,sans-serif;font-size:34px;font-weight:700;letter-spacing:12px;color:#b71422;text-align:center;"
+                                                            th:text="${otp}">000000</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin:18px 0 0;font-size:14px;line-height:1.6;color:#5b403e;text-align:center;">
+                                        Mã có hiệu lực trong <strong style="color:#b71422;" th:text="${expireMinutes}">10</strong> phút.
+                                        <br/>Không chia sẻ mã này với bất kỳ ai.
+                                    </p>
+
+                                    <!-- CTA -->
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:26px;">
+                                        <tr>
+                                            <td align="center">
+                                                <a th:href="${otpPageUrl}"
+                                                   href="https://bioverse.eraidev.id.vn/pages/otp.html"
+                                                   style="display:inline-block;padding:12px 22px;background:#b71422;color:#ffffff;text-decoration:none;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;border:2.5px solid #2d2d2d;border-radius:10px;box-shadow:3px 3px 0 #2d2d2d;"
+                                                   th:text="${ctaLabel}">Mở trang xác thực OTP</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Accent chips -->
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:28px;">
+                                        <tr>
+                                            <td width="33%" style="padding:4px;" align="center">
+                                                <div style="padding:8px 6px;background:#f6f3f2;border:2px solid #2d2d2d;border-radius:8px;">
+                                                    <div style="font-family:Epilogue,Arial,sans-serif;font-size:15px;font-weight:800;color:#b71422;">OTP</div>
+                                                    <div style="font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;font-weight:600;color:#76716a;margin-top:2px;">6 CHỮ SỐ</div>
+                                                </div>
+                                            </td>
+                                            <td width="33%" style="padding:4px;" align="center">
+                                                <div style="padding:8px 6px;background:#f6f3f2;border:2px solid #2d2d2d;border-radius:8px;">
+                                                    <div style="font-family:Epilogue,Arial,sans-serif;font-size:15px;font-weight:800;color:#2e5ea2;">STEM</div>
+                                                    <div style="font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;font-weight:600;color:#76716a;margin-top:2px;">THỰC HÀNH</div>
+                                                </div>
+                                            </td>
+                                            <td width="34%" style="padding:4px;" align="center">
+                                                <div style="padding:8px 6px;background:#f6f3f2;border:2px solid #2d2d2d;border-radius:8px;">
+                                                    <div style="font-family:Epilogue,Arial,sans-serif;font-size:15px;font-weight:800;color:#00864c;">LAB</div>
+                                                    <div style="font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;font-weight:600;color:#76716a;margin-top:2px;">AN TOÀN</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#76716a;">
+                                        Nếu bạn không yêu cầu thao tác này, hãy bỏ qua email — tài khoản vẫn an toàn.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Footer -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:16px 28px 22px;border-top:2px dashed #e4e2e1;background:#f6f3f2;font-size:12px;line-height:1.55;color:#76716a;">
+                                    © <span th:text="${year}">2026</span> BioVerse · Sổ tay thực hành STEM.
+                                    <br/>
+                                    <a th:href="${appUrl}" href="https://bioverse.eraidev.id.vn" style="color:#2e5ea2;font-weight:600;text-decoration:underline;">bioverse.eraidev.id.vn</a>
+                                    · Email tự động, vui lòng không trả lời.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding:18px 8px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;color:#8f6f6d;letter-spacing:0.04em;">
+                        Gửi qua Brevo · Bảo mật OTP · Không chia sẻ mã
                     </td>
                 </tr>
             </table>
