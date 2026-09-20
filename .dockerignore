@@ -11,4 +11,6 @@ db
 firebase/serviceAccountKey.json
 HELP.md
 README.md
+deploy
+.github
 **/.DS_Store

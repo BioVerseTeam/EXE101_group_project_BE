@@ -1,0 +1,80 @@
+# Cloudflare Tunnel — BioVerse (FE + BE cùng hostname).
+#
+# Domain: https://bioverse.eraidev.id.vn
+# BE Docker publish: 127.0.0.1:8088 (HOST_PORT trong .env) — KHÔNG mở public.
+# Compose chạy dưới Linux user `bioverse` tại /projects/bioverse; cloudflared
+# có thể giữ nguyên dưới root/tools — không đổi Service URL.
+# FE gọi relative `/api/...` → Public Hostname / path /api phải trỏ về Spring Boot
+# (controllers đã có prefix /api; cloudflared giữ nguyên path, không strip).
+#
+# Không dùng nginx. TLS/HTTPS do Cloudflare edge; cloudflared chỉ forward HTTP local.
+#
+# =============================================================================
+# KHUYẾN NGHỊ (token-based tunnel — như cloudflared Docker trên VPS hiện có)
+# =============================================================================
+# Khi chạy: `cloudflared tunnel run --token <TOKEN>`
+# → ingress / Public Hostname cấu hình trên Cloudflare Zero Trust dashboard,
+#   KHÔNG cần file config.yml local (file này chỉ tham khảo nếu dùng credentials-file).
+#
+# Zero Trust → Networks → Tunnels → chọn tunnel đang chạy → Public Hostname:
+#
+#   1) Path /api  (và tuỳ chọn /swagger-ui, /v3/api-docs)
+#      Hostname: bioverse.eraidev.id.vn
+#      Path:     /api
+#      Service:  http://host.docker.internal:8088
+#      (cloudflared container cần extra_hosts: host.docker.internal:host-gateway)
+#
+#   2) Catch-all FE (nếu FE đã có hostname này rồi thì giữ nguyên rule FE)
+#      Hostname: bioverse.eraidev.id.vn
+#      Path:     (để trống / *)
+#      Service:  http://127.0.0.1:<FE_PORT>  hoặc origin FE hiện tại
+#
+# Thứ tự rule trên dashboard: path cụ thể (/api) trước, catch-all FE sau.
+# DNS: CNAME bioverse.eraidev.id.vn → <TUNNEL_ID>.cfargotunnel.com (proxied) —
+#      thường Cloudflare tạo sẵn khi add Public Hostname.
+#
+# Không cần gắn cloudflared vào Docker network `bioverse` nếu đã publish
+# 127.0.0.1:8088 + dùng host.docker.internal (cách đơn giản nhất với tunnel hiện có).
+#
+# =============================================================================
+# Tuỳ chọn B — gắn cloudflared vào network compose BioVerse
+# =============================================================================
+# Trong docker-compose cloudflared: thêm network external `bioverse-prod_bioverse`
+# (tên = <compose project>_bioverse; project CI dùng -p bioverse-prod).
+# Public Hostname Service: http://bioverse-backend:8088
+# Phức tạp hơn nếu Tikzy đã dùng network khác — chỉ dùng khi không muốn publish port.
+#
+# =============================================================================
+# Tuỳ chọn C — credentials-file + config local (không dùng token)
+# =============================================================================
+# Copy file này → /etc/cloudflared/config.yml, điền tunnel UUID + credentials JSON.
+# Chạy: cloudflared tunnel run   (hoặc systemd service).
+# Không commit token / credentials vào git.
+
+tunnel: <TUNNEL_UUID>
+credentials-file: /etc/cloudflared/<TUNNEL_UUID>.json
+
+originRequest:
+  connectTimeout: 30s
+  keepAliveTimeout: 90s
+
+ingress:
+  - hostname: bioverse.eraidev.id.vn
+    path: /api
+    service: http://127.0.0.1:8088
+    originRequest:
+      httpHostHeader: bioverse.eraidev.id.vn
+
+  - hostname: bioverse.eraidev.id.vn
+    path: /swagger-ui
+    service: http://127.0.0.1:8088
+
+  - hostname: bioverse.eraidev.id.vn
+    path: /v3/api-docs
+    service: http://127.0.0.1:8088
+
+  # FE static — chỉnh port cho đúng setup hiện tại
+  - hostname: bioverse.eraidev.id.vn
+    service: http://127.0.0.1:4173
+
+  - service: http_status:404
