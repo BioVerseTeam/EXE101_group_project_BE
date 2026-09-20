@@ -1,14 +1,24 @@
 # Production: backend + Redis trên cùng Docker network.
 # Redis không publish ra ngoài. Backend đọc .env; host Redis bị override thành tên service.
 #
-# Máy build:
-#   docker compose -f docker-compose.prod.yml build
-#   docker tag bioverse-be:latest YOUR_REGISTRY/bioverse-be:latest
-#   docker push YOUR_REGISTRY/bioverse-be:latest
+# Chạy trên VPS với Linux user `bioverse` (không root), thư mục /projects/bioverse.
+# User `bioverse` phải thuộc group `docker` để compose không cần sudo.
 #
-# Server (chỉ cần file này + .env + firebase key):
-#   docker compose -f docker-compose.prod.yml pull
-#   docker compose -f docker-compose.prod.yml up -d
+# CI/CD (GitHub Actions) trên VPS (SSH as bioverse):
+#   BACKEND_IMAGE=registry.eraidev.id.vn/bioverse/bioverse-backend \
+#   IMAGE_TAG=<git-sha> \
+#   docker compose -f docker-compose.prod.yml -p bioverse-prod pull
+#   docker compose -f docker-compose.prod.yml -p bioverse-prod up -d --remove-orphans
+#
+# Setup lần đầu trên server (as bioverse trong /projects/bioverse):
+#   1) cp .env.prod.example .env
+#      → .env.prod.example chỉ là mẫu; .env là secrets runtime (JWT, Redis, Supabase, mail, R2…).
+#      Điền giá trị thật. KHÔNG commit .env.
+#   2) Đặt firebase/serviceAccountKey.json cạnh compose (hoặc đổi FIREBASE_KEY_PATH trong .env).
+#      File JSON private key từ Firebase Console → Project settings → Service accounts
+#      → Generate new private key. chmod 600. Compose mount vào container để BE dùng Firestore (AI chat).
+#   3) Cloudflare Tunnel: Public Hostname /api → http://host.docker.internal:8088
+#      (chi tiết: deploy/cloudflared-bioverse.yml.example; cloudflared có thể giữ dưới root/tools)
 
 name: bioverse-prod
 
@@ -36,7 +46,7 @@ services:
       - bioverse
 
   backend:
-    image: ${BACKEND_IMAGE:-bioverse-be:latest}
+    image: ${BACKEND_IMAGE:-registry.eraidev.id.vn/bioverse/bioverse-backend}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -45,12 +55,18 @@ services:
     env_file:
       - .env
     environment:
+      # Port trong container cố định — khớp Dockerfile EXPOSE và map bên dưới
+      SERVER_PORT: "8088"
       REDIS_HOST: bioverse-redis
       REDIS_PORT: "6379"
       REDIS_SSL: "false"
       REDIS_URL: ""
+      FIREBASE_SERVICE_ACCOUNT_PATH: /app/firebase/serviceAccountKey.json
+      # FE production origin (CORS). Có thể override trong .env
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://bioverse.eraidev.id.vn}
     ports:
-      - "${SERVER_PORT:-8088}:8088"
+      # Chỉ localhost — cloudflared trên cùng VPS tunnel vào đây. Đổi HOST_PORT trong .env nếu cần.
+      - "127.0.0.1:${HOST_PORT:-8088}:8088"
     volumes:
       - ${FIREBASE_KEY_PATH:-./firebase/serviceAccountKey.json}:/app/firebase/serviceAccountKey.json:ro
     depends_on:

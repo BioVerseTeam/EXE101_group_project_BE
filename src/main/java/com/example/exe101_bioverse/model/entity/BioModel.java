@@ -2,8 +2,7 @@ package com.example.exe101_bioverse.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.ColumnTransformer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,12 +44,12 @@ public class BioModel {
     @Column(columnDefinition = "TEXT")
     private String characteristics;
 
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(read = "cast(classification as text)", write = "?::jsonb")
     private String classification;
 
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "fun_facts", columnDefinition = "jsonb")
+    @ColumnTransformer(read = "cast(fun_facts as text)", write = "?::jsonb")
     private String funFacts;
 
     // 3D asset files
@@ -72,16 +71,16 @@ public class BioModel {
     @Builder.Default
     private BigDecimal defaultScale = BigDecimal.ONE;
 
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "default_rotation", columnDefinition = "jsonb")
+    @ColumnTransformer(read = "cast(default_rotation as text)", write = "?::jsonb")
     private String defaultRotation;
 
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "camera_position", columnDefinition = "jsonb")
+    @ColumnTransformer(read = "cast(camera_position as text)", write = "?::jsonb")
     private String cameraPosition;
 
-    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(read = "cast(annotations as text)", write = "?::jsonb")
     private String annotations;
 
     // V14 fields

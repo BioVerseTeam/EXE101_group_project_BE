@@ -19,13 +19,12 @@ public class AnswerController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<AnswerResponse>> saveAnswer(@RequestBody AnswerRequest answerRequest) {
-        AnswerResponse answerResponse = answerService.saveAnswer(answerRequest);
-        return ResponseEntity.ok(ApiResponse.success(answerResponse, "Lưu câu trả lời thành công"));
+        return ResponseEntity.ok(ApiResponse.success(answerService.saveAnswer(answerRequest)));
     }
 
     @GetMapping("/question/{questionId}")
-    public ResponseEntity<ApiResponse<List<AnswerResponse>>> getAnswersByQuestionId(@PathVariable("questionId") Long questionId) {
-        List<AnswerResponse> answerResponses = answerService.getAnswersByQuestionId(questionId);
-        return ResponseEntity.ok(ApiResponse.success(answerResponses));
+    public ResponseEntity<ApiResponse<List<AnswerResponse>>> getAnswersByQuestionId(
+            @PathVariable("questionId") Long questionId) {
+        return ResponseEntity.ok(ApiResponse.success(answerService.getAnswersByQuestionId(questionId)));
     }
 }

@@ -18,11 +18,8 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
     @Query("""
             SELECT r FROM Role r
-            WHERE (
-                    :q IS NULL
-                    OR LOWER(r.code) LIKE LOWER(CONCAT('%', :q, '%'))
-                    OR LOWER(r.name) LIKE LOWER(CONCAT('%', :q, '%'))
-                  )
+            WHERE LOWER(r.code) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(r.name) LIKE LOWER(CONCAT('%', :q, '%'))
             """)
     Page<Role> search(@Param("q") String q, Pageable pageable);
 }

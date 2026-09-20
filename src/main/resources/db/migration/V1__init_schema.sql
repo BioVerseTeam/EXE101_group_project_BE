@@ -1,5 +1,5 @@
 -- Create exam table
-CREATE TABLE IF NOT EXISTS exam (
+CREATE TABLE exam (
     id BIGSERIAL PRIMARY KEY,
     code VARCHAR(255),
     type VARCHAR(255),
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS exam (
 );
 
 -- Create question table
-CREATE TABLE IF NOT EXISTS question (
+CREATE TABLE question (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(255),
     content TEXT,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS question (
 );
 
 -- Create exam_question link table
-CREATE TABLE IF NOT EXISTS exam_question (
+CREATE TABLE exam_question (
     id BIGSERIAL PRIMARY KEY,
     point DOUBLE PRECISION NOT NULL,
     question_order INT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS exam_question (
 );
 
 -- Create question_image table
-CREATE TABLE IF NOT EXISTS question_image (
+CREATE TABLE question_image (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
     display_order INT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS question_image (
 );
 
 -- Create answer table
-CREATE TABLE IF NOT EXISTS answer (
+CREATE TABLE answer (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(255),
     content TEXT,
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS answer (
 );
 
 -- Create answer_image table
-CREATE TABLE IF NOT EXISTS answer_image (
+CREATE TABLE answer_image (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
     display_order INT NOT NULL,
