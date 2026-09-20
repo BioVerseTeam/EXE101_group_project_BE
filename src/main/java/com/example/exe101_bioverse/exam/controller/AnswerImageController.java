@@ -18,14 +18,14 @@ public class AnswerImageController {
     private AnswerImageService answerImageService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AnswerImageResponse>> saveAnswerImage(
-            @RequestBody AnswerImageRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(answerImageService.saveAnswerImage(request)));
+    public ResponseEntity<ApiResponse<AnswerImageResponse>> saveAnswerImage(@RequestBody AnswerImageRequest request) {
+        AnswerImageResponse answerImageResponse = answerImageService.saveAnswerImage(request);
+        return ResponseEntity.ok(ApiResponse.success(answerImageResponse, "Lưu ảnh đáp án thành công"));
     }
 
     @GetMapping("/answer/{answerId}")
-    public ResponseEntity<ApiResponse<List<AnswerImageResponse>>> getAnswerImagesByAnswerId(
-            @PathVariable("answerId") Long answerId) {
-        return ResponseEntity.ok(ApiResponse.success(answerImageService.getAnswerImagesByAnswerId(answerId)));
+    public ResponseEntity<ApiResponse<List<AnswerImageResponse>>> getAnswerImagesByAnswerId(@PathVariable("answerId") Long answerId) {
+        List<AnswerImageResponse> answerImageResponses = answerImageService.getAnswerImagesByAnswerId(answerId);
+        return ResponseEntity.ok(ApiResponse.success(answerImageResponses));
     }
 }

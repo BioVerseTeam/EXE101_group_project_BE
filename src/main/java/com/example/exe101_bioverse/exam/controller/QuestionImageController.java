@@ -18,15 +18,14 @@ public class QuestionImageController {
     private QuestionImageService questionImageService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<QuestionImageResponse>> saveQuestionImage(
-            @RequestBody QuestionImageRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(questionImageService.saveQuestionImage(request)));
+    public ResponseEntity<ApiResponse<QuestionImageResponse>> saveQuestionImage(@RequestBody QuestionImageRequest request) {
+        QuestionImageResponse questionImageResponse = questionImageService.saveQuestionImage(request);
+        return ResponseEntity.ok(ApiResponse.success(questionImageResponse, "Lưu ảnh câu hỏi thành công"));
     }
 
     @GetMapping("/question/{questionId}")
-    public ResponseEntity<ApiResponse<List<QuestionImageResponse>>> getQuestionImagesByQuestionId(
-            @PathVariable("questionId") Long questionId) {
-        return ResponseEntity.ok(
-                ApiResponse.success(questionImageService.getQuestionImagesByQuestionId(questionId)));
+    public ResponseEntity<ApiResponse<List<QuestionImageResponse>>> getQuestionImagesByQuestionId(@PathVariable("questionId") Long questionId) {
+        List<QuestionImageResponse> questionImageResponses = questionImageService.getQuestionImagesByQuestionId(questionId);
+        return ResponseEntity.ok(ApiResponse.success(questionImageResponses));
     }
 }

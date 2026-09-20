@@ -29,33 +29,41 @@ public class FirebaseConfig {
     private String serviceAccountPath;
 
     @Bean
-    public Firestore firestore() throws IOException {
+    public Firestore firestore() {
         if (FirebaseApp.getApps().isEmpty()) {
             File keyFile = findServiceAccountFile();
-            InputStream serviceAccountStream;
-            if (keyFile != null) {
-                log.info("Firebase service account loaded from {}", keyFile.getAbsolutePath());
-                serviceAccountStream = new FileInputStream(keyFile);
-            } else {
-                serviceAccountStream = getClass().getClassLoader().getResourceAsStream(serviceAccountPath);
-                if (serviceAccountStream == null) {
-                    throw new FileNotFoundException(
-                            "Firebase service account key not found. Tried: " + String.join(", ", candidatePaths())
-                                    + " and classpath:" + serviceAccountPath
-                    );
+            try {
+                InputStream serviceAccountStream;
+                if (keyFile != null) {
+                    log.info("Firebase service account loaded from {}", keyFile.getAbsolutePath());
+                    serviceAccountStream = new FileInputStream(keyFile);
+                } else {
+                    serviceAccountStream = getClass().getClassLoader().getResourceAsStream(serviceAccountPath);
+                    if (serviceAccountStream == null) {
+                        log.warn("⚠️ Firebase service account key not found (tried {}). Firestore will not be initialized. Fallback in-memory storage will be used for AI conversations.", candidatePaths());
+                        return null;
+                    }
+                    log.info("Firebase service account loaded from classpath:{}", serviceAccountPath);
                 }
-                log.info("Firebase service account loaded from classpath:{}", serviceAccountPath);
-            }
 
-            try (serviceAccountStream) {
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
-                        .build();
-                FirebaseApp.initializeApp(options);
+                try (InputStream is = serviceAccountStream) {
+                    FirebaseOptions options = FirebaseOptions.builder()
+                            .setCredentials(GoogleCredentials.fromStream(is))
+                            .build();
+                    FirebaseApp.initializeApp(options);
+                }
+            } catch (Exception e) {
+                log.warn("⚠️ Failed to initialize Firebase: {}. Fallback in-memory storage will be used for AI conversations.", e.getMessage());
+                return null;
             }
         }
 
-        return FirestoreClient.getFirestore();
+        try {
+            return FirestoreClient.getFirestore();
+        } catch (Exception e) {
+            log.warn("⚠️ Failed to obtain Firestore client: {}. Fallback in-memory storage will be used.", e.getMessage());
+            return null;
+        }
     }
 
     private File findServiceAccountFile() {
