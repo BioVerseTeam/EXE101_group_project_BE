@@ -28,22 +28,25 @@ public class MailService {
     private final SpringTemplateEngine emailTemplateEngine;
     private final String from;
     private final String fromName;
+    private final String appUrl;
 
     public MailService(
             JavaMailSender mailSender,
             @Qualifier("emailTemplateEngine") SpringTemplateEngine emailTemplateEngine,
             @Value("${bioverse.mail.from:}") String from,
-            @Value("${bioverse.mail.from-name:Bioverse}") String fromName
+            @Value("${bioverse.mail.from-name:BioVerse}") String fromName,
+            @Value("${bioverse.mail.app-url:https://bioverse.eraidev.id.vn}") String appUrl
     ) {
         this.mailSender = mailSender;
         this.emailTemplateEngine = emailTemplateEngine;
         this.from = from;
         this.fromName = fromName;
+        this.appUrl = trimTrailingSlash(appUrl);
     }
 
     public void sendOtp(String to, String fullName, String otp, OtpPurpose purpose, long expireMinutes) {
         if (from == null || from.isBlank()) {
-            throw new AppException(ErrorCode.EMAIL_SEND_FAILED, "Chưa cấu hình MAIL_FROM / MAIL_USERNAME");
+            throw new AppException(ErrorCode.EMAIL_SEND_FAILED, "Chưa cấu hình MAIL_FROM (Brevo verified sender)");
         }
 
         Context context = new Context(Locale.forLanguageTag("vi"));
@@ -54,6 +57,10 @@ public class MailService {
         context.setVariable("purpose", purpose.name());
         context.setVariable("purposeTitle", purposeTitle(purpose));
         context.setVariable("purposeHint", purposeHint(purpose));
+        context.setVariable("purposeBadge", purposeBadge(purpose));
+        context.setVariable("ctaLabel", purposeCta(purpose));
+        context.setVariable("appUrl", appUrl);
+        context.setVariable("otpPageUrl", appUrl + "/pages/otp.html");
 
         String html = emailTemplateEngine.process("mail/otp", context);
         try {
@@ -64,7 +71,7 @@ public class MailService {
             helper.setFrom(new InternetAddress(from, fromName, StandardCharsets.UTF_8.name()));
             helper.setText(html, true);
             mailSender.send(message);
-            log.info("OTP email sent to {} for {}", to, purpose);
+            log.info("OTP email sent via Brevo to {} for {}", to, purpose);
         } catch (Exception ex) {
             log.error("Failed to send OTP email to {} for {}", to, purpose, ex);
             throw new AppException(ErrorCode.EMAIL_SEND_FAILED);
@@ -80,9 +87,9 @@ public class MailService {
 
     private String purposeSubject(OtpPurpose purpose) {
         return switch (purpose) {
-            case REGISTER -> "Mã xác thực đăng ký Bioverse";
-            case RESET_PASSWORD -> "Mã đặt lại mật khẩu Bioverse";
-            case CHANGE_PASSWORD -> "Mã xác thực đổi mật khẩu Bioverse";
+            case REGISTER -> "BioVerse · Mã xác thực đăng ký";
+            case RESET_PASSWORD -> "BioVerse · Mã đặt lại mật khẩu";
+            case CHANGE_PASSWORD -> "BioVerse · Mã xác thực đổi mật khẩu";
         };
     }
 
@@ -96,9 +103,36 @@ public class MailService {
 
     private String purposeHint(OtpPurpose purpose) {
         return switch (purpose) {
-            case REGISTER -> "Nhập mã này để hoàn tất đăng ký tài khoản Bioverse.";
-            case RESET_PASSWORD -> "Nhập mã này để xác thực và đặt lại mật khẩu Bioverse.";
-            case CHANGE_PASSWORD -> "Nhập mã này cùng mật khẩu mới để đổi mật khẩu tài khoản Bioverse.";
+            case REGISTER -> "Nhập mã 6 số này trên trang OTP để hoàn tất đăng ký sổ tay BioVerse.";
+            case RESET_PASSWORD -> "Nhập mã 6 số này để xác thực và đặt lại mật khẩu tài khoản BioVerse.";
+            case CHANGE_PASSWORD -> "Nhập mã 6 số này cùng mật khẩu mới để đổi mật khẩu tài khoản BioVerse.";
         };
+    }
+
+    private String purposeBadge(OtpPurpose purpose) {
+        return switch (purpose) {
+            case REGISTER -> "LAB_VERIFY · ĐĂNG KÝ";
+            case RESET_PASSWORD -> "LAB_VERIFY · ĐẶT LẠI MK";
+            case CHANGE_PASSWORD -> "LAB_VERIFY · ĐỔI MK";
+        };
+    }
+
+    private String purposeCta(OtpPurpose purpose) {
+        return switch (purpose) {
+            case REGISTER -> "Mở trang xác thực OTP";
+            case RESET_PASSWORD -> "Mở trang đặt lại mật khẩu";
+            case CHANGE_PASSWORD -> "Quay lại BioVerse";
+        };
+    }
+
+    private static String trimTrailingSlash(String url) {
+        if (url == null || url.isBlank()) {
+            return "https://bioverse.eraidev.id.vn";
+        }
+        String trimmed = url.trim();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed;
     }
 }
