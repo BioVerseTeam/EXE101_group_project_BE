@@ -1,0 +1,111 @@
+name: BioVerse BE CI/CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Harbor project/repo — tạo trước trên registry.eraidev.id.vn
+  IMAGE_NAME: registry.eraidev.id.vn/bioverse/bioverse-backend
+  # Thư mục trên VPS chứa clone repo BE (compose + .env + firebase key).
+  # Owner: user Linux `bioverse` (không dùng root). GitHub Secret SERVER_USER=bioverse.
+  DEPLOY_PATH: /projects/bioverse
+
+jobs:
+  build-image:
+    name: Build and push image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: registry.eraidev.id.vn
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy on VPS
+    needs: build-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull and restart BioVerse BE
+        uses: appleboy/ssh-action@v1.2.2
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          DEPLOY_PATH: ${{ env.DEPLOY_PATH }}
+        with:
+          # SERVER_USER phải là `bioverse` (đã trong group docker), không dùng root
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          fingerprint: ${{ secrets.SERVER_FINGERPRINT }}
+          port: 22
+          envs: HARBOR_USERNAME,HARBOR_PASSWORD,IMAGE_TAG,IMAGE_NAME,DEPLOY_PATH
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd "$DEPLOY_PATH"
+
+            # Cập nhật compose / cloudflared mẫu nếu có thay đổi trên main
+            if [ -d .git ]; then
+              git fetch origin main
+              git checkout main
+              git pull --ff-only origin main
+            fi
+
+            if [ ! -f .env ]; then
+              echo "Missing $DEPLOY_PATH/.env — copy from .env.prod.example and fill secrets"
+              exit 1
+            fi
+
+            echo "$HARBOR_PASSWORD" | docker login registry.eraidev.id.vn \
+              --username "$HARBOR_USERNAME" \
+              --password-stdin
+            trap 'docker logout registry.eraidev.id.vn >/dev/null 2>&1 || true' EXIT
+
+            export BACKEND_IMAGE="$IMAGE_NAME"
+            export IMAGE_TAG="$IMAGE_TAG"
+
+            docker compose -f docker-compose.prod.yml -p bioverse-prod pull
+            docker compose -f docker-compose.prod.yml -p bioverse-prod up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml -p bioverse-prod ps
+
+            # Health: Springdoc OpenAPI (public). Port trong container luôn 8088.
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              if curl --fail --silent --show-error --max-time 10 \
+                http://127.0.0.1:8088/v3/api-docs >/dev/null; then
+                echo "Backend healthy on :8088"
+                exit 0
+              fi
+              if [ "$attempt" -eq 10 ]; then
+                docker compose -f docker-compose.prod.yml -p bioverse-prod ps
+                docker compose -f docker-compose.prod.yml -p bioverse-prod logs --tail=120 backend
+                exit 1
+              fi
+              sleep 6
+            done
