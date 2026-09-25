@@ -55,8 +55,10 @@ public class SecurityConfig {
                                 "/api/reactions",
                                 "/api/reactions/**",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/ai/chat"
                         ).permitAll()
+                        .requestMatchers("/api/ai/conversations", "/api/ai/conversations/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
                         .anyRequest().permitAll()

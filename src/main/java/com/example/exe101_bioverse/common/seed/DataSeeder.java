@@ -51,7 +51,7 @@ public class DataSeeder implements ApplicationRunner {
         List<SeedUser> seeds = List.of(
                 new SeedUser(
                         "admin@bioverse.com",
-                        "Admin@BioVerse!2026",
+                        "Admin@123456",
                         "Bioverse Admin",
                         "0900000001",
                         null,
@@ -82,26 +82,32 @@ public class DataSeeder implements ApplicationRunner {
         );
 
         for (SeedUser seed : seeds) {
-            if (userRepository.existsByEmail(seed.email())) {
-                log.info("Skip seed user, already exists: {}", seed.email());
-                continue;
-            }
-            User user = User.builder()
-                    .email(seed.email())
-                    .passwordHash(passwordEncoder.encode(seed.password()))
-                    .fullName(seed.fullName())
-                    .phone(seed.phone())
-                    .grade(seed.grade())
-                    .dateOfBirth(seed.dateOfBirth())
-                    .gender(seed.gender())
-                    .role(seed.role())
-                    .status(UserStatus.ACTIVE)
-                    .emailVerified(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build();
-            userRepository.save(user);
-            log.info("Seeded user {} / {} ({})", seed.email(), seed.password(), seed.role().getCode());
+            userRepository.findByEmail(seed.email()).ifPresentOrElse(
+                    user -> {
+                        user.setPasswordHash(passwordEncoder.encode(seed.password()));
+                        user.setUpdatedAt(now);
+                        userRepository.save(user);
+                        log.info("Refreshed password for seed user: {} / {}", seed.email(), seed.password());
+                    },
+                    () -> {
+                        User user = User.builder()
+                                .email(seed.email())
+                                .passwordHash(passwordEncoder.encode(seed.password()))
+                                .fullName(seed.fullName())
+                                .phone(seed.phone())
+                                .grade(seed.grade())
+                                .dateOfBirth(seed.dateOfBirth())
+                                .gender(seed.gender())
+                                .role(seed.role())
+                                .status(UserStatus.ACTIVE)
+                                .emailVerified(true)
+                                .createdAt(now)
+                                .updatedAt(now)
+                                .build();
+                        userRepository.save(user);
+                        log.info("Seeded user {} / {} ({})", seed.email(), seed.password(), seed.role().getCode());
+                    }
+            );
         }
     }
 
