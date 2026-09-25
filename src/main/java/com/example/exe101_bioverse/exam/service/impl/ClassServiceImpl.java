@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.ClassRequest;
 import com.example.exe101_bioverse.exam.dto.response.ClassResponse;
 import com.example.exe101_bioverse.exam.entity.Grade;
@@ -25,10 +27,10 @@ public class ClassServiceImpl implements GradeService {
     @Transactional
     public ClassResponse createClass(ClassRequest request) {
         if (request.getGrade() == null) {
-            throw new IllegalArgumentException("Khối lớp (grade) không được để trống.");
+            throw new AppException(ErrorCode.INVALID_DATA, "Khối lớp (grade) không được để trống.");
         }
         if (classRepository.findByGrade(request.getGrade()).isPresent()) {
-            throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
+            throw new AppException(ErrorCode.CLASS_GRADE_EXISTS, "Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
         }
 
         Grade entity = classMapper.toEntity(request);
@@ -42,14 +44,14 @@ public class ClassServiceImpl implements GradeService {
     @Transactional
     public ClassResponse updateClass(Long id, ClassRequest request) {
         Grade entity = classRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp với ID: " + id));
 
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
             entity.setName(request.getName());
         }
         if (request.getGrade() != null && !request.getGrade().equals(entity.getGrade())) {
             if (classRepository.findByGrade(request.getGrade()).isPresent()) {
-                throw new IllegalArgumentException("Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
+                throw new AppException(ErrorCode.CLASS_GRADE_EXISTS, "Khối lớp " + request.getGrade() + " đã tồn tại trong hệ thống.");
             }
             entity.setGrade(request.getGrade());
         }
@@ -65,14 +67,14 @@ public class ClassServiceImpl implements GradeService {
     @Override
     public ClassResponse getClassById(Long id) {
         Grade entity = classRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp với ID: " + id));
         return classMapper.toResponse(entity);
     }
 
     @Override
     public ClassResponse getClassByGrade(Integer grade) {
         Grade entity = classRepository.findByGrade(grade)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp: " + grade));
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp: " + grade));
         return classMapper.toResponse(entity);
     }
 
@@ -87,7 +89,7 @@ public class ClassServiceImpl implements GradeService {
     @Transactional
     public void deleteClass(Long id) {
         if (!classRepository.existsById(id)) {
-            throw new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + id);
+            throw new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp với ID: " + id);
         }
         classRepository.deleteById(id);
     }
