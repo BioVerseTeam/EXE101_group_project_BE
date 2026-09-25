@@ -98,6 +98,28 @@ BEGIN
         ALTER TABLE exam ADD CONSTRAINT fk_exam_subject 
             FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL;
     END IF;
+
+    -- Đảm bảo các cột mở rộng cho Exam entity tồn tại
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'exam' AND column_name = 'duration_minutes'
+    ) THEN
+        ALTER TABLE exam ADD COLUMN duration_minutes INT DEFAULT 45;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'exam' AND column_name = 'total_score'
+    ) THEN
+        ALTER TABLE exam ADD COLUMN total_score DOUBLE PRECISION DEFAULT 10.0;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'exam' AND column_name = 'is_active'
+    ) THEN
+        ALTER TABLE exam ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE;
+    END IF;
 END $$;
 
 CREATE INDEX IF NOT EXISTS idx_exam_subject_id ON exam(subject_id);

@@ -1,4 +1,4 @@
-﻿-- ==============================================================================
+-- ==============================================================================
 -- V17: SEED EXAM DATA FOR KHTN GRADES 6 TO 9 (SEMESTERS 1 & 2)
 -- Tổng hợp dữ liệu đề thi, câu hỏi trắc nghiệm, đáp án và ảnh minh họa
 -- Áp dụng tự động thông qua Flyway Migration hoặc import trực tiếp vào PostgreSQL
@@ -15,6 +15,11 @@ ALTER TABLE answer ALTER COLUMN description TYPE TEXT;
 ALTER TABLE exam ALTER COLUMN description TYPE TEXT;
 ALTER TABLE question_image ALTER COLUMN url TYPE TEXT;
 ALTER TABLE answer_image ALTER COLUMN url TYPE TEXT;
+
+-- Đảm bảo các cột mở rộng cho Exam entity tồn tại
+ALTER TABLE exam ADD COLUMN IF NOT EXISTS duration_minutes INT DEFAULT 45;
+ALTER TABLE exam ADD COLUMN IF NOT EXISTS total_score DOUBLE PRECISION DEFAULT 10.0;
+ALTER TABLE exam ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- ==============================================================================
 -- PHẦN 1. LỚP 6 - GIỮA HỌC KỲ 1 (Nguồn: insert code lớp 6 giữa kì 1.txt)
@@ -53,7 +58,7 @@ BEGIN
     END IF;
 
     -- 4. TẠO ĐỀ THI: ĐỀ SỐ 1
-INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
 VALUES (
     v_subject_id,
     'DE_GK1_KHTN6_01',
@@ -61,6 +66,7 @@ VALUES (
     'DEFAULT',
     'Khoa học Tự nhiên',
     'Đề kiểm tra giữa học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức.',
+    45, 10.0, TRUE,
     NOW(),
     NOW()
 ) RETURNING id INTO v_exam_id;
@@ -980,7 +986,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 1 KHTN 6 - ĐỀ SỐ 2
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN6_02',
@@ -988,6 +994,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -1285,7 +1292,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 1 KHTN 6 - ĐỀ SỐ 3
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN6_03',
@@ -1293,6 +1300,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 3.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -1591,7 +1599,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN III: ĐỀ THI GIỮA KÌ 1 KHTN 6 - ĐỀ SỐ 4
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN6_04',
@@ -1599,6 +1607,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 4.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -1932,7 +1941,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 1 KHTN 6 - ĐỀ SỐ 1
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN6_01',
@@ -1940,6 +1949,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -2356,7 +2366,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 1 KHTN 6 - ĐỀ SỐ 2
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN6_02',
@@ -2364,6 +2374,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -2777,7 +2788,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN III: ĐỀ THI HỌC KÌ 1 KHTN 6 - ĐỀ SỐ 3
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN6_03',
@@ -2785,6 +2796,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 3.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -3194,7 +3206,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN IV: ĐỀ THI HỌC KÌ 1 KHTN 6 - ĐỀ SỐ 4
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN6_04',
@@ -3202,6 +3214,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 4.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -3657,7 +3670,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 2 KHTN 6 - ĐỀ SỐ 1
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN6_01',
@@ -3665,6 +3678,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -3812,7 +3826,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 2 KHTN 6 - ĐỀ SỐ 2
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN6_02',
@@ -3820,6 +3834,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -3967,7 +3982,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN III: ĐỀ THI GIỮA KÌ 2 KHTN 6 - ĐỀ SỐ 3
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN6_03',
@@ -3975,6 +3990,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 3.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -4124,7 +4140,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN IV: ĐỀ THI GIỮA KÌ 2 KHTN 6 - ĐỀ SỐ 4
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN6_04',
@@ -4132,6 +4148,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 4.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -4320,7 +4337,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 2 KHTN 6 - ĐỀ SỐ 1 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN6_01',
@@ -4328,6 +4345,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -4616,7 +4634,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 2 KHTN 6 - ĐỀ SỐ 2 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN6_02',
@@ -4624,6 +4642,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -4911,7 +4930,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN III: ĐỀ THI HỌC KÌ 2 KHTN 6 - ĐỀ SỐ 3 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN6_03',
@@ -4919,6 +4938,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 3.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -5206,7 +5226,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN IV: ĐỀ THI HỌC KÌ 2 KHTN 6 - ĐỀ SỐ 4 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN6_04',
@@ -5214,6 +5234,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 4.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -5541,7 +5562,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 1 KHTN 7 - ĐỀ SỐ 1 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN7_01',
@@ -5549,6 +5570,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -5864,7 +5886,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 1 KHTN 7 - ĐỀ SỐ 2 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN7_02',
@@ -5872,6 +5894,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -6224,7 +6247,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 1 KHTN 7 - ĐỀ SỐ 1 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN7_01',
@@ -6232,6 +6255,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -6544,7 +6568,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 1 KHTN 7 - ĐỀ SỐ 2 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN7_02',
@@ -6552,6 +6576,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -6903,7 +6928,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 2 KHTN 7 - ĐỀ SỐ 1 (20 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN7_01',
@@ -6911,6 +6936,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -7122,7 +7148,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 2 KHTN 7 - ĐỀ SỐ 2 (20 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN7_02',
@@ -7130,6 +7156,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -7377,7 +7404,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI KHTN 7 - ĐỀ SỐ 1 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_KHTN7_01',
@@ -7385,6 +7412,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -7672,7 +7700,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI KHTN 7 - ĐỀ SỐ 2 (28 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_KHTN7_02',
@@ -7680,6 +7708,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra gồm 28 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -8006,7 +8035,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 1 KHTN 8 - ĐỀ SỐ 1 (12 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN8_01',
@@ -8014,6 +8043,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 12 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -8142,7 +8172,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 1 KHTN 8 - ĐỀ SỐ 2 (12 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN8_02',
@@ -8150,6 +8180,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 12 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -8316,7 +8347,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 1 KHTN 8 - ĐỀ SỐ 1 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN8_01',
@@ -8324,6 +8355,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -8631,7 +8663,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 1 KHTN 8 - ĐỀ SỐ 2 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN8_02',
@@ -8639,6 +8671,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -8985,7 +9018,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA HỌC KÌ 2 KHTN 8 - ĐỀ SỐ 1 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN8_01',
@@ -8993,6 +9026,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -9302,7 +9336,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA HỌC KÌ 2 KHTN 8 - ĐỀ SỐ 2 (30 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN8_02',
@@ -9310,6 +9344,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 30 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -9658,7 +9693,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 2 KHTN 8 - ĐỀ SỐ 1 (20 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN8_01',
@@ -9666,6 +9701,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -9875,7 +9911,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 2 KHTN 8 - ĐỀ SỐ 2 (20 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN8_02',
@@ -9883,6 +9919,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 20 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -10129,7 +10166,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 1 KHTN 9 - ĐỀ SỐ 1 (16 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN9_01',
@@ -10137,6 +10174,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 16 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -10304,7 +10342,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 1 KHTN 9 - ĐỀ SỐ 2 (16 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK1_KHTN9_02',
@@ -10312,6 +10350,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 1 gồm 16 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -10519,7 +10558,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 1 KHTN 9 - ĐỀ SỐ 1 (18 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN9_01',
@@ -10527,6 +10566,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 18 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -10714,7 +10754,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 1 KHTN 9 - ĐỀ SỐ 2 (40 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK1_KHTN9_02',
@@ -10722,6 +10762,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 1 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -11169,7 +11210,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI GIỮA KÌ 2 KHTN 9 - ĐỀ SỐ 1 (18 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN9_01',
@@ -11177,6 +11218,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 18 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -11364,7 +11406,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI GIỮA KÌ 2 KHTN 9 - ĐỀ SỐ 2 (40 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_GK2_KHTN9_02',
@@ -11372,6 +11414,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra giữa học kì 2 gồm 40 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        45, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -11819,7 +11862,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN I: ĐỀ THI HỌC KÌ 2 KHTN 9 - ĐỀ SỐ 1 (11 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN9_01',
@@ -11827,6 +11870,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 11 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 1.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -11944,7 +11988,7 @@ BEGIN
     -- ====================================================================
     -- PHẦN II: ĐỀ THI HỌC KÌ 2 KHTN 9 - ĐỀ SỐ 2 (12 CÂU)
     -- ====================================================================
-    INSERT INTO exam (subject_id, code, name, type, subject_name, description, created_date, updated_date)
+    INSERT INTO exam (subject_id, code, name, type, subject_name, description, duration_minutes, total_score, is_active, created_date, updated_date)
     VALUES (
         v_subject_id,
         'DE_CK2_KHTN9_02',
@@ -11952,6 +11996,7 @@ BEGIN
         'DEFAULT',
         'Khoa học Tự nhiên',
         'Đề kiểm tra học kì 2 gồm 12 câu trắc nghiệm khách quan chuẩn SGK Kết nối tri thức - Đề số 2.',
+        60, 10.0, TRUE,
         NOW(), NOW()
     ) RETURNING id INTO v_exam_id;
 
@@ -12078,4 +12123,16 @@ BEGIN
     RAISE NOTICE 'Đã chèn thành công Đề 1 (11 câu) và Đề 2 (12 câu) Cuối kì 2 KHTN Lớp 9!';
 END $$;
 
-
+-- ==============================================================================
+-- 5. ĐỒNG BỘ CẬP NHẬT DỮ LIỆU ĐỀ THI (DURATION, TOTAL SCORE, IS ACTIVE)
+-- Đảm bảo toàn bộ các đề thi hiện hữu đều có đầy đủ thông số cấu hình chuẩn
+-- ==============================================================================
+UPDATE exam
+SET duration_minutes = CASE
+        WHEN duration_minutes IS NOT NULL THEN duration_minutes
+        WHEN code LIKE '%CK%' THEN 60
+        ELSE 45
+    END,
+    total_score = COALESCE(total_score, 10.0),
+    is_active = COALESCE(is_active, TRUE)
+WHERE duration_minutes IS NULL OR total_score IS NULL OR is_active IS NULL;
