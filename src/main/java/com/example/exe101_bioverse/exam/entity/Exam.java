@@ -32,6 +32,15 @@ public class Exam {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
+    @Column(name = "total_score")
+    private Double totalScore;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id")
     private Subject subject;

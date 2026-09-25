@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface QuestionImageService {
     QuestionImageResponse saveQuestionImage(QuestionImageRequest questionImageRequest);
-    List<QuestionImage> internalSaveQuestionImage(Question question,List<QuestionImageRequest> questionImageRequests);
+    List<QuestionImage> internalSaveQuestionImage(Question question, List<QuestionImageRequest> questionImageRequests);
     List<QuestionImageResponse> getQuestionImagesByQuestionId(Long questionId);
+    void deleteQuestionImage(Long id);
 }

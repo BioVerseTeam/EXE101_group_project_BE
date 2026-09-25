@@ -14,6 +14,9 @@ public interface ExamMapper {
     @Mapping(target = "updatedDate", ignore = true)
     @Mapping(target = "examQuestions", ignore = true)
     @Mapping(target = "subject", ignore = true)
+    @Mapping(target = "durationMinutes", ignore = true)
+    @Mapping(target = "totalScore", ignore = true)
+    @Mapping(target = "isActive", ignore = true)
     Exam toEntity(ExamRequest examRequest);
 
     @Mapping(target = "questions", ignore = true)

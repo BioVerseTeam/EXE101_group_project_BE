@@ -24,6 +24,7 @@ public class AnswerResponse {
 
     private String description;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("isCorrect")
     private boolean isCorrect;
 
     private Long questionId;
