@@ -37,12 +37,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring(7);
-        if (jwtService.isValidAccessToken(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (!jwtService.isValidAccessToken(token)) {
+            writeUnauthorized(response, "Access token không hợp lệ hoặc đã hết hạn");
+            return;
+        }
+
+        try {
             Claims claims = jwtService.parseClaims(token);
             Long userId = Long.parseLong(claims.getSubject());
 
-            if (!tokenBlacklistService.isBlacklisted(token, claims)
-                    && !tokenBlacklistService.isUserTokenRevoked(userId, claims.getIssuedAt())) {
+            try {
+                if (tokenBlacklistService.isBlacklisted(token, claims)
+                        || tokenBlacklistService.isUserTokenRevoked(userId, claims.getIssuedAt())) {
+                    writeUnauthorized(response, "Token đã bị vô hiệu hóa");
+                    return;
+                }
+            } catch (Exception redisEx) {
+                logger.warn("Redis blacklist check failed, allowing valid JWT: " + redisEx.getMessage());
+            }
+
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 String email = claims.get("email", String.class);
                 String role = claims.get("role", String.class);
                 UserPrincipal principal = new UserPrincipal(userId, email, "", role, true);
@@ -51,8 +65,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        } catch (Exception e) {
+            logger.error("JWT filter processing error for token: " + e.getMessage(), e);
+            writeUnauthorized(response, "Access token không hợp lệ");
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private static void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setCharacterEncoding(java.nio.charset.StandardCharsets.UTF_8.name());
+        response.setContentType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(
+                "{\"data\":null,\"code\":1008,\"message\":\"" + message + "\"}"
+        );
     }
 }
