@@ -18,22 +18,22 @@ public class ExamQuestionController {
     private ExamQuestionService examQuestionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ExamQuestionResponse>> saveExamQuestion(
-            @RequestBody ExamQuestionRequest examQuestionRequest) {
-        return ResponseEntity.ok(ApiResponse.success(examQuestionService.saveExamQuestion(examQuestionRequest)));
+    public ResponseEntity<ApiResponse<ExamQuestionResponse>> saveExamQuestion(@RequestBody ExamQuestionRequest examQuestionRequest) {
+        ExamQuestionResponse examQuestionResponse = examQuestionService.saveExamQuestion(examQuestionRequest);
+        return ResponseEntity.ok(ApiResponse.success(examQuestionResponse, "Lưu câu hỏi vào đề thi thành công"));
     }
 
     @GetMapping("/exam/{examId}")
-    public ResponseEntity<ApiResponse<List<ExamQuestionResponse>>> getExamQuestionsByExamId(
-            @PathVariable("examId") Long examId) {
-        return ResponseEntity.ok(ApiResponse.success(examQuestionService.getExamQuestionsByExamId(examId)));
+    public ResponseEntity<ApiResponse<List<ExamQuestionResponse>>> getExamQuestionsByExamId(@PathVariable("examId") Long examId) {
+        List<ExamQuestionResponse> examQuestionResponses = examQuestionService.getExamQuestionsByExamId(examId);
+        return ResponseEntity.ok(ApiResponse.success(examQuestionResponses));
     }
 
     @GetMapping("/exam/{examId}/question/{questionId}")
     public ResponseEntity<ApiResponse<List<ExamQuestionResponse>>> getExamQuestionsByExamIdAndQuestionId(
             @PathVariable("examId") Long examId,
             @PathVariable("questionId") Long questionId) {
-        return ResponseEntity.ok(ApiResponse.success(
-                examQuestionService.getExamQuestionsByExamIdAndQuestionId(examId, questionId)));
+        List<ExamQuestionResponse> examQuestionResponses = examQuestionService.getExamQuestionsByExamIdAndQuestionId(examId, questionId);
+        return ResponseEntity.ok(ApiResponse.success(examQuestionResponses));
     }
 }

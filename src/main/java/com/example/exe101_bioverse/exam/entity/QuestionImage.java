@@ -20,6 +20,7 @@ public class QuestionImage {
 
     private LocalDateTime createdDate;
 
+    @Column(columnDefinition = "TEXT")
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)

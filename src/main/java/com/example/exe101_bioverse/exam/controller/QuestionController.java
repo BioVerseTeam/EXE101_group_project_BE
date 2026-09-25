@@ -19,27 +19,26 @@ public class QuestionController {
     private QuestionService questionService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<QuestionResponse>> saveQuestion(
-            @RequestBody QuestionRequest questionRequest) {
-        return ResponseEntity.ok(
-                ApiResponse.success(questionService.saveQuestion(questionRequest, QuestionResponse.class)));
+    public ResponseEntity<ApiResponse<QuestionResponse>> saveQuestion(@RequestBody QuestionRequest questionRequest) {
+        QuestionResponse questionResponse = questionService.saveQuestion(questionRequest, QuestionResponse.class);
+        return ResponseEntity.ok(ApiResponse.success(questionResponse, "Lưu câu hỏi thành công"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<QuestionResponse>> getQuestionById(
-            @PathVariable("id") Long questionId) {
-        return ResponseEntity.ok(ApiResponse.success(questionService.getQuestionById(questionId)));
+    public ResponseEntity<ApiResponse<QuestionResponse>> getQuestionById(@PathVariable("id") Long questionId) {
+        QuestionResponse questionResponse = questionService.getQuestionById(questionId);
+        return ResponseEntity.ok(ApiResponse.success(questionResponse));
     }
 
     @GetMapping("/exam/{examId}")
-    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuestionsByExamId(
-            @PathVariable("examId") Long examId) {
-        return ResponseEntity.ok(ApiResponse.success(questionService.getQuestionsByExamId(examId)));
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuestionsByExamId(@PathVariable("examId") Long examId) {
+        List<QuestionResponse> questionResponses = questionService.getQuestionsByExamId(examId);
+        return ResponseEntity.ok(ApiResponse.success(questionResponses));
     }
 
     @GetMapping("/type/{questionType}")
-    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuestionByType(
-            @PathVariable("questionType") QuestionType questionType) {
-        return ResponseEntity.ok(ApiResponse.success(questionService.getQuestionByType(questionType)));
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuestionByType(@PathVariable("questionType") QuestionType questionType) {
+        List<QuestionResponse> questionResponses = questionService.getQuestionByType(questionType);
+        return ResponseEntity.ok(ApiResponse.success(questionResponses));
     }
 }

@@ -13,6 +13,7 @@ public interface ExamMapper {
     @Mapping(target = "createdDate", ignore = true)
     @Mapping(target = "updatedDate", ignore = true)
     @Mapping(target = "examQuestions", ignore = true)
+    @Mapping(target = "subject", ignore = true)
     Exam toEntity(ExamRequest examRequest);
 
     @Mapping(target = "questions", ignore = true)

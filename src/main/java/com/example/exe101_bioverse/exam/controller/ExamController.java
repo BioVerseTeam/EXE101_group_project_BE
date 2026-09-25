@@ -19,32 +19,37 @@ public class ExamController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ExamResponse>> saveExam(@RequestBody ExamRequest examRequest) {
-        return ResponseEntity.ok(ApiResponse.success(examService.saveExam(examRequest, ExamResponse.class)));
+        ExamResponse examResponse = examService.saveExam(examRequest, ExamResponse.class);
+        return ResponseEntity.ok(ApiResponse.success(examResponse, "Lưu đề thi thành công"));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ExamResponse>>> getAllExams() {
-        return ResponseEntity.ok(ApiResponse.success(examService.getAllExams()));
+        List<ExamResponse> examResponses = examService.getAllExams();
+        return ResponseEntity.ok(ApiResponse.success(examResponses));
     }
 
     @GetMapping("/subject/{subjectName}")
-    public ResponseEntity<ApiResponse<List<ExamResponse>>> getExamsBySubjectName(
-            @PathVariable String subjectName) {
-        return ResponseEntity.ok(ApiResponse.success(examService.getExamsBySubjectName(subjectName)));
+    public ResponseEntity<ApiResponse<List<ExamResponse>>> getExamsBySubjectName(@PathVariable String subjectName) {
+        List<ExamResponse> examResponses = examService.getExamsBySubjectName(subjectName);
+        return ResponseEntity.ok(ApiResponse.success(examResponses));
     }
 
     @GetMapping("/type/{type}")
     public ResponseEntity<ApiResponse<List<ExamResponse>>> getExamsByType(@PathVariable String type) {
-        return ResponseEntity.ok(ApiResponse.success(examService.getExamsByType(type)));
+        List<ExamResponse> examResponses = examService.getExamsByType(type);
+        return ResponseEntity.ok(ApiResponse.success(examResponses));
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<ApiResponse<List<ExamResponse>>> getExamsByName(@PathVariable String name) {
-        return ResponseEntity.ok(ApiResponse.success(examService.getExamsByName(name)));
+        List<ExamResponse> examResponses = examService.getExamsByName(name);
+        return ResponseEntity.ok(ApiResponse.success(examResponses));
     }
 
     @GetMapping("/code/{code}")
     public ResponseEntity<ApiResponse<List<ExamResponse>>> getExamsByCode(@PathVariable String code) {
-        return ResponseEntity.ok(ApiResponse.success(examService.getExamsByCode(code)));
+        List<ExamResponse> examResponses = examService.getExamsByCode(code);
+        return ResponseEntity.ok(ApiResponse.success(examResponses));
     }
 }
