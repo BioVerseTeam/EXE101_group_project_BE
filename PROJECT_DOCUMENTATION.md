@@ -30,7 +30,9 @@
    - [6.9. Phương trình Hoá học công khai (Public Reactions)](#69-phương-trình-hoá-học-công-khai-public-reactions)
    - [6.10. Lưu trữ & Streaming Asset 3D (R2 Storage Proxy)](#610-lưu-trữ--streaming-asset-3d-r2-storage-proxy)
    - [6.11. Trợ lý Trí tuệ nhân tạo (AI Tutor & Conversations)](#611-trợ-lý-trí-tuệ-nhân-tạo-ai-tutor--conversations)
-   - [6.12. Hệ thống Khối lớp, Học kỳ, Môn học & Đề thi (Exam Taxonomy)](#612-hệ-thống-khối-lớp-học-kỳ-môn-học--đề-thi-exam-taxonomy)
+   - [6.12. Phân hệ Quản trị Đề thi & Xưởng biên soạn Exam Studio (Exam Taxonomy & Studio)](#612-phân-hệ-quản-trị-đề-thi--xưởng-biên-soạn-exam-studio-exam-taxonomy--studio)
+   - [6.13. Tải lên Đa phương tiện Cloudflare R2 (Media Upload)](#613-tải-lên-đa-phương-tiện-cloudflare-r2-media-upload)
+   - [6.14. Phân hệ Khảo thí & Luồng thi Chống gian lận Học sinh (Student Examination Flow)](#614-phân-hệ-khảo-thí--luồng-thi-chống-gian-lận-học-sinh-student-examination-flow)
 7. [Các cơ chế kỹ thuật cốt lõi (Core Mechanics)](#7-các-cơ-chế-kỹ-thuật-cốt-lõi-core-mechanics)
    - [Bảo mật & Phân quyền (Stateless JWT & Redis Blacklist)](#bảo-mật--phân-quyền-stateless-jwt--redis-blacklist)
    - [Xác thực OTP Email đa tầng với Redis](#xác-thực-otp-email-đa-tầng-với-redis)
@@ -41,6 +43,7 @@
    - [Thống kê người dùng Admin Census & Snapshot](#thống-kê-người-dùng-admin-census--snapshot)
    - [Tự động nạp cấu hình thông minh với DotEnvLoader](#tự-động-nạp-cấu-hình-thông-minh-với-dotenvloader)
    - [Thuật toán Điểm danh Daily Streak](#thuật-toán-điểm-danh-daily-streak)
+   - [Khảo thí Chống gian lận & Server Chấm điểm Tự động](#khảo-thí-chống-gian-lận--server-chấm-điểm-tự-động-anti-cheat--auto-grading)
 8. [Hướng dẫn Cài đặt & Vận hành (Deployment & Setup)](#8-hướng-dẫn-cài-đặt--vận-hành-deployment--setup)
    - [Yêu cầu tiên quyết](#yêu-cầu-tiên-quyết)
    - [Biến môi trường (.env) chi tiết](#biến-môi-trường-env-chi-tiết)
@@ -202,8 +205,8 @@ Hệ thống quản lý cơ sở dữ liệu phiên bản tự động bằng **
 | **`V16__model_categories_and_labs.sql`** | Model Categories & Labs | Bảng `bio_model_categories` (loại mẫu catalog) & `bio_labs` (phòng lab 3D gắn với nhân mẫu) |
 | **`V17__reaction_equations.sql`** | Reaction Equations | Bảng `reaction_equations` chứa dữ liệu JSONB `.chemx` mô phỏng phản ứng hoá học theo keyframe |
 | **`V18__seed_more_reactions.sql`** | Seed Reactions | Nạp sẵn hàng loạt hoạt cảnh phản ứng: quang hợp, hô hấp tế bào, trung hòa axit - bazơ... |
-| **`V19__exam_class_semester_subject_schema.sql`** | Exam Taxonomy | Hệ thống phân loại đề thi: `exam_classes`, `exam_semesters`, `exam_subjects` |
-| **`V20__seed_exam_data_khtn_grade_6_to_9.sql`** | Seed Exam Data | Nạp 16 bộ đề thi mẫu KHTN đầy đủ cho Lớp 6, 7, 8, 9 (Giữa kỳ & Cuối kỳ) kèm câu hỏi, đáp án, ảnh |
+| **`V19__exam_class_semester_subject_schema.sql`** | Exam Taxonomy | Bảng `grades` (lớp 6-9), `semesters` (HK1, HK2), `subjects` (KHTN), mở rộng `exam` (`duration_minutes`, `total_score`, `is_active`) |
+| **`V20__seed_exam_data_khtn_grade_6_to_9.sql`** | Seed Exam Data | Nạp 40 bộ đề thi chuẩn KHTN THCS (10 đề cho mỗi khối Lớp 6, 7, 8, 9) gồm 400 câu hỏi, 1600 đáp án và giải thích chi tiết |
 
 ---
 
@@ -265,7 +268,7 @@ Tất cả các API trả về phản hồi định dạng JSON đồng nhất:
 | **`1400`** | `400 Bad Request` | `INVALID_DATA` | Dữ liệu đầu vào vi phạm ràng buộc validation |
 | **`1403`** | `403 Forbidden` | `ACCESS_DENIED` | Không có quyền truy cập tài nguyên |
 | **`1410`** | `400 Bad Request` | `INVALID_FILE` | Định dạng file tải lên không hợp lệ |
-| **`1411`** | `400 Bad Request` | `FILE_TOO_LARGE` | Kích thước file vượt quá giới hạn cho phép |
+| **`1411`** | `400 Bad Request` | `FILE_TOO_LARGE` | Kích thước file vượt quá giới hạn cho phép (max 5MB) |
 | **`1501`** | `404 Not Found` | `MODEL_NOT_FOUND` | Không tìm thấy mô hình 3D |
 | **`1502`** | `503 Service Unavailable` | `STORAGE_NOT_CONFIGURED` | Chưa cấu hình thông số Cloudflare R2 |
 | **`1503`** | `502 Bad Gateway` | `STORAGE_ERROR` | Lỗi kết nối hoặc truyền tải dữ liệu từ Cloudflare R2 |
@@ -277,6 +280,19 @@ Tất cả các API trả về phản hồi định dạng JSON đồng nhất:
 | **`1509`** | `404 Not Found` | `REACTION_NOT_FOUND` | Không tìm thấy phương trình hoá học |
 | **`1510`** | `409 Conflict` | `REACTION_CODE_EXISTS` | Mã phương trình hoá học đã tồn tại |
 | **`1511`** | `403 Forbidden` | `SYSTEM_REACTION_PROTECTED` | Không thể ẩn hoặc đổi mã phương trình hoá học hệ thống |
+| **`1601`** | `404 Not Found` | `CLASS_NOT_FOUND` | Không tìm thấy khối lớp |
+| **`1602`** | `409 Conflict` | `CLASS_GRADE_EXISTS` | Khối lớp đã tồn tại trong hệ thống |
+| **`1603`** | `404 Not Found` | `SEMESTER_NOT_FOUND` | Không tìm thấy học kỳ |
+| **`1604`** | `404 Not Found` | `SUBJECT_NOT_FOUND` | Không tìm thấy môn học |
+| **`1605`** | `404 Not Found` | `EXAM_NOT_FOUND` | Không tìm thấy đề thi |
+| **`1606`** | `404 Not Found` | `QUESTION_NOT_FOUND` | Không tìm thấy câu hỏi |
+| **`1607`** | `404 Not Found` | `ANSWER_NOT_FOUND` | Không tìm thấy đáp án |
+| **`1608`** | `404 Not Found` | `EXAM_QUESTION_NOT_FOUND` | Không tìm thấy câu hỏi trong đề thi |
+| **`1609`** | `404 Not Found` | `QUESTION_IMAGE_NOT_FOUND` | Không tìm thấy hình ảnh câu hỏi |
+| **`1610`** | `404 Not Found` | `ANSWER_IMAGE_NOT_FOUND` | Không tìm thấy hình ảnh đáp án |
+| **`1611`** | `400 Bad Request` | `UNSUPPORTED_RETURN_TYPE` | Kiểu dữ liệu phản hồi không được hỗ trợ |
+| **`1612`** | `409 Conflict` | `EXAM_CODE_EXISTS` | Mã đề thi đã tồn tại trong hệ thống |
+| **`1613`** | `404 Not Found` | `EXAM_ATTEMPT_NOT_FOUND` | Lượt làm bài thi không tồn tại trong hệ thống |
 
 ---
 
@@ -426,7 +442,7 @@ Tất cả các API trả về phản hồi định dạng JSON đồng nhất:
 }
 ```
 
-### 6.12. Hệ thống Khối lớp, Học kỳ, Môn học & Đề thi (Exam Taxonomy)
+### 6.12. Phân hệ Quản trị Đề thi & Xưởng biên soạn Exam Studio (Exam Taxonomy & Studio)
 
 #### A. Quản lý Khối lớp (`/api/classes`)
 | Method | Endpoint | Quyền | Mô tả chức năng |
@@ -458,28 +474,68 @@ Tất cả các API trả về phản hồi định dạng JSON đồng nhất:
 | `PUT` | `/api/subjects/{id}` | Public | Cập nhật thông tin môn học |
 | `DELETE` | `/api/subjects/{id}` | Public | Xóa môn học |
 
-#### D. Quản lý Đề thi, Câu hỏi, Đáp án & Hình ảnh
+#### D. Quản trị Đề thi & Xưởng biên soạn Exam Studio (`/api/exams`)
 | Method | Endpoint | Quyền | Mô tả chức năng |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/exams` | Public | Tạo mới bài kiểm tra (có thể gắn `subjectId`) |
-| `GET` | `/api/exams` | Public | Lấy danh sách tất cả bài kiểm tra |
-| `GET` | `/api/exams/subject/{subjectName}` | Public | Lọc đề thi theo tên môn học (Sinh học, Hóa học, Vật lý) |
-| `GET` | `/api/exams/type/{type}` | Public | Lọc đề thi theo loại (15 phút, 1 tiết, giữa kỳ, cuối kỳ) |
-| `GET` | `/api/exams/name/{name}` | Public | Tìm đề thi theo tiêu đề |
-| `GET` | `/api/exams/code/{code}` | Public | Tìm đề thi theo mã đề duy nhất |
-| `POST` | `/api/questions` | Public | Tạo câu hỏi mới |
+| `POST` | `/api/exams` | Public | Tạo mới bài kiểm tra (có thể gắn `subjectId`, `code`, `name`, `type`) |
+| `GET` | `/api/exams` | Public | Lấy danh sách đề thi (Hỗ trợ phân trang Catalog: `page`, `size`, `search`, `subjectId`, `grade`, `sort`) |
+| `GET` | `/api/exams/{id}` | Public | Lấy thông tin chi tiết đề thi theo ID |
+| `PUT` | `/api/exams/{id}` | Public | Cập nhật thông tin đề thi (`ExamUpdateRequest`: title, code, time, totalScore, isActive) |
+| `DELETE` | `/api/exams/{id}` | Public | Xóa đề thi khỏi hệ thống |
+| `POST` | `/api/exams/{id}/duplicate` | Public | Nhân bản đề thi kèm toàn bộ cấu trúc liên kết câu hỏi sang đề thi mới |
+| `GET` | `/api/exams/{id}/builder` | Public | Nạp toàn bộ cây dữ liệu phân cấp Đề thi ➔ Câu hỏi ➔ Đáp án ➔ Ảnh ➔ Mô hình 3D cho Xưởng biên soạn |
+| `PUT` | `/api/exams/{id}/questions/reorder` | Public | Cập nhật hàng loạt thứ tự câu hỏi và phân bổ lại điểm số sau thao tác kéo thả |
+| `POST` | `/api/exams/{id}/questions/composite` | Public | Tạo nhanh câu hỏi nguyên khối kèm danh sách đáp án và ảnh minh họa gán thẳng vào đề |
+| `DELETE` | `/api/exams/{id}/questions/{questionId}` | Public | Gỡ câu hỏi khỏi đề thi hiện tại (vẫn lưu trong ngân hàng câu hỏi dùng chung) |
+| `POST` | `/api/exams/{id}/questions/pick-from-bank` | Public | Nhặt hàng loạt câu hỏi từ ngân hàng câu hỏi vào đề thi với điểm mặc định |
+| `GET` | `/api/exams/subject/{subjectName}` | Public | Lọc danh sách đề thi theo tên môn học |
+| `GET` | `/api/exams/type/{type}` | Public | Lọc danh sách đề thi theo loại đề |
+| `GET` | `/api/exams/name/{name}` | Public | Tìm kiếm đề thi theo tiêu đề |
+| `GET` | `/api/exams/code/{code}` | Public | Tra cứu đề thi theo mã đề duy nhất |
+
+#### E. Ngân hàng Câu hỏi & Đáp án (`/api/questions`, `/api/answers`)
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/questions` | Public | Tạo câu hỏi mới trong ngân hàng câu hỏi |
+| `GET` | `/api/questions/bank` | Public | Tìm kiếm ngân hàng câu hỏi dùng chung (phân trang, lọc theo từ khóa `search`, loại câu `type`) |
 | `GET` | `/api/questions/{id}` | Public | Lấy chi tiết câu hỏi theo ID |
-| `GET` | `/api/questions/exam/{examId}` | Public | Lấy tất cả câu hỏi thuộc về một đề thi |
-| `GET` | `/api/questions/type/{questionType}` | Public | Lọc câu hỏi theo dạng (SINGLE_CHOICE, MULTIPLE_CHOICE...) |
-| `POST` | `/api/exam-questions` | Public | Gán câu hỏi vào đề thi kèm thứ tự câu và điểm số |
-| `GET` | `/api/exam-questions/exam/{examId}` | Public | Lấy cấu trúc đề thi và danh sách câu hỏi gán kèm điểm |
-| `GET` | `/api/exam-questions/exam/{examId}/question/{questionId}` | Public | Lấy chi tiết một câu hỏi cụ thể trong cấu trúc đề thi |
-| `POST` | `/api/answers` | Public | Tạo đáp án lựa chọn cho câu hỏi |
+| `PUT` | `/api/questions/{id}` | Public | Cập nhật nội dung, loại câu hỏi và lời giải thích |
+| `DELETE` | `/api/questions/{id}` | Public | Xóa câu hỏi khỏi ngân hàng (tự động xóa đáp án, ảnh và liên kết đề thi liên quan) |
+| `POST` | `/api/questions/{questionId}/answers` | Public | Thêm nhanh đáp án lựa chọn cho câu hỏi |
+| `GET` | `/api/questions/exam/{examId}` | Public | Lấy danh sách câu hỏi thuộc một đề thi |
+| `GET` | `/api/questions/type/{questionType}` | Public | Lọc danh sách câu hỏi theo loại (`SINGLE_CHOICE`, `MULTIPLE_CHOICE`) |
+| `POST` | `/api/answers` | Public | Tạo đáp án lựa chọn mới |
 | `GET` | `/api/answers/question/{questionId}` | Public | Lấy danh sách đáp án của một câu hỏi |
-| `POST` | `/api/question-images` | Public | Đính kèm hình ảnh minh họa cho câu hỏi |
+
+#### F. Quản lý Liên kết Đề thi & Hình ảnh Minh họa (`/api/exam-questions`, `/api/question-images`, `/api/answer-images`)
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/exam-questions` | Public | Gán câu hỏi vào đề thi kèm thứ tự câu (`questionOrder`) và điểm số (`point`) |
+| `GET` | `/api/exam-questions/exam/{examId}` | Public | Lấy cấu trúc đề thi và danh sách câu hỏi gán kèm trọng số điểm |
+| `GET` | `/api/exam-questions/exam/{examId}/question/{questionId}` | Public | Lấy chi tiết một câu hỏi cụ thể trong cấu trúc đề thi |
+| `POST` | `/api/question-images` | Public | Đính kèm hình ảnh minh họa cho câu hỏi (lưu trữ URL Cloudflare R2) |
 | `GET` | `/api/question-images/question/{questionId}` | Public | Lấy danh sách ảnh minh họa của câu hỏi |
+| `DELETE` | `/api/question-images/{id}` | Public | Xóa hình ảnh minh họa của câu hỏi |
 | `POST` | `/api/answer-images` | Public | Đính kèm hình ảnh minh họa cho đáp án |
 | `GET` | `/api/answer-images/answer/{answerId}` | Public | Lấy danh sách ảnh minh họa của đáp án |
+| `DELETE` | `/api/answer-images/{id}` | Public | Xóa hình ảnh minh họa của đáp án |
+
+### 6.13. Tải lên Đa phương tiện Cloudflare R2 (Media Upload)
+**Prefix:** `/api/media`
+
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/media/upload` | Public | Tải tệp hình ảnh (`JPG`, `PNG`, `WebP`, tối đa 5MB) trực tiếp lên Cloudflare R2, trả về URL công khai |
+
+### 6.14. Phân hệ Khảo thí & Luồng thi Chống gian lận Học sinh (Student Examination Flow)
+**Prefix:** `/api/student`
+
+| Method | Endpoint | Quyền | Mô tả chức năng |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/student/exams/{id}/paper` | Public / Auth | **Lấy đề thi chống gian lận (Anti-Cheat):** Ẩn hoàn toàn thuộc tính `isCorrect` và `explanation` để học sinh không thể mở F12 DevTools xem trước đáp án |
+| `POST` | `/api/student/exams/{id}/submit` | Authenticated | **Nộp bài & Server chấm điểm:** Server nhận danh sách `{ questionId, selectedAnswerId, timeSpentSec }`, tính điểm chính thức chuẩn xác trên thang 10, lưu `ExamAttempt` & `AttemptAnswer`, cộng XP cho học sinh |
+| `GET` | `/api/student/exam-attempts/{attemptId}` | Authenticated | **Xem lại bài làm & Lời giải:** Trả về chi tiết từng câu (đáp án học sinh chọn, đáp án đúng của hệ thống và giải thích chi tiết `explanation`) |
+| `GET` | `/api/student/exam-attempts/my-history` | Authenticated | **Lịch sử thi của học sinh:** Xem toàn bộ bài kiểm tra đã làm kèm bảng tổng kết (số đề đã làm, điểm trung bình, điểm cao nhất, tổng thời gian ôn luyện) |
 
 ---
 
@@ -543,6 +599,16 @@ Phân hệ AI Tutor sử dụng mô hình ngôn ngữ lớn thông qua OpenRoute
     - Nếu đã điểm danh trong ngày hôm nay: Không thay đổi số ngày liên tiếp.
     - Nếu điểm danh vào ngày kế tiếp (liên tục): Tăng `current_streak` thêm 1. Cập nhật `longest_streak` nếu vượt qua kỷ lục cũ.
     - Nếu bị ngắt quãng quá 1 ngày: Đặt lại `current_streak = 1`, giữ nguyên `longest_streak`.
+
+### Khảo thí Chống gian lận & Server Chấm điểm Tự động (Anti-Cheat & Auto-Grading)
+- **Thiết kế Anti-Cheat by Design:**
+  - Để ngăn chặn triệt để tình trạng học sinh mở F12 DevTools hoặc kiểm tra Network Tab để soi đáp án đúng trước khi nộp bài, Server phân tách hai luồng dữ liệu độc lập:
+    1. Khi phát đề thi (`GET /api/student/exams/{id}/paper`): Toàn bộ các trường nhạy cảm như `isCorrect` và `explanation` bị gỡ bỏ 100% trước khi serialize thành JSON trả về cho Client.
+    2. Chỉ sau khi nộp bài và hoàn tất chấm điểm (`GET /api/student/exam-attempts/{attemptId}`), Server mới trả về bản ghi chi tiết kèm `isCorrect: true`, phương án học sinh chọn `isSelected: true` và lời giải thích cặn kẽ `explanation`.
+- **Cơ chế Chấm điểm & Thưởng XP tại Server:**
+  - Quá trình tính điểm diễn ra 100% tại Server (`POST /api/student/exams/{id}/submit`): Hệ thống lấy toàn bộ đáp án chuẩn từ cơ sở dữ liệu để đối chiếu với câu trả lời của học sinh, tính điểm chuẩn xác trên thang 10.0.
+  - Tự động lưu bản ghi `ExamAttempt` và các câu trả lời chi tiết `AttemptAnswer` vào cơ sở dữ liệu.
+  - Tự động tính toán điểm thưởng kinh nghiệm (XP) theo công thức: $XP = \lfloor score \times 10 \rfloor$ (bài thi đạt 10.0 điểm được thưởng tối đa 100 XP), đồng thời gửi phản hồi khích lệ tinh thần học tập của học sinh.
 
 ---
 
