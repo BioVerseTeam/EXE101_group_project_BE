@@ -11,4 +11,5 @@ public interface AnswerImageService {
     AnswerImageResponse saveAnswerImage(AnswerImageRequest request);
     List<AnswerImage> internalSaveAnswerImage(Answer answer, List<AnswerImageRequest> request);
     List<AnswerImageResponse> getAnswerImagesByAnswerId(Long AnswerId);
+    void deleteAnswerImage(Long id);
 }

@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface AnswerService {
     AnswerResponse saveAnswer(AnswerRequest answerRequest);
-    List<Answer> internalSaveAnswers(Question question,List<AnswerRequest> answerRequestList);
+    List<Answer> internalSaveAnswers(Question question, List<AnswerRequest> answerRequestList);
     List<AnswerResponse> getAnswersByQuestionId(Long questionId);
+    AnswerResponse addAnswerToQuestion(Long questionId, AnswerRequest request);
+    AnswerResponse updateAnswer(Long id, AnswerRequest request);
+    void deleteAnswer(Long id);
 }

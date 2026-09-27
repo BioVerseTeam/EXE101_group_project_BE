@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.QuestionImageRequest;
 import com.example.exe101_bioverse.exam.dto.response.QuestionImageResponse;
 import com.example.exe101_bioverse.exam.entity.Question;
@@ -33,7 +35,7 @@ public class QuestionImageServiceImpl implements QuestionImageService {
                 questionImage = questionImageRepository.save(questionImage);
                 return questionImageMapper.toResponse(questionImage);
             } else {
-                throw new RuntimeException("Question image not found with id: " + questionImageRequest.getId());
+                throw new AppException(ErrorCode.QUESTION_IMAGE_NOT_FOUND, "Không tìm thấy hình ảnh câu hỏi với ID: " + questionImageRequest.getId());
             }
         } else {
             var questionImage = questionImageMapper.toEntity(questionImageRequest);
@@ -60,5 +62,12 @@ public class QuestionImageServiceImpl implements QuestionImageService {
         return questionImageRepository.findByQuestionId(questionId).stream()
                 .map(questionImageMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    public void deleteQuestionImage(Long id) {
+        QuestionImage questionImage = questionImageRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.QUESTION_IMAGE_NOT_FOUND, "Không tìm thấy hình ảnh câu hỏi với ID: " + id));
+        questionImageRepository.delete(questionImage);
     }
 }

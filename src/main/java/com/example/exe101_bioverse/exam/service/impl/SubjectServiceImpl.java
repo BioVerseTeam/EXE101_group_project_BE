@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.SubjectRequest;
 import com.example.exe101_bioverse.exam.dto.response.SubjectResponse;
 import com.example.exe101_bioverse.exam.entity.Semester;
@@ -31,10 +33,10 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public SubjectResponse createSubject(SubjectRequest request) {
         if (request.getSemesterId() == null) {
-            throw new IllegalArgumentException("semesterId không được để trống.");
+            throw new AppException(ErrorCode.INVALID_DATA, "semesterId không được để trống.");
         }
         Semester semester = semesterRepository.findById(request.getSemesterId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + request.getSemesterId()));
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND, "Không tìm thấy học kỳ với ID: " + request.getSemesterId()));
 
         Subject subject = subjectMapper.toEntity(request);
         subject.setSemester(semester);
@@ -49,11 +51,11 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public SubjectResponse updateSubject(Long id, SubjectRequest request) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy môn học với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_FOUND, "Không tìm thấy môn học với ID: " + id));
 
         if (request.getSemesterId() != null && !request.getSemesterId().equals(subject.getSemester().getId())) {
             Semester semester = semesterRepository.findById(request.getSemesterId())
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + request.getSemesterId()));
+                    .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND, "Không tìm thấy học kỳ với ID: " + request.getSemesterId()));
             subject.setSemester(semester);
         }
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
@@ -75,7 +77,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional(readOnly = true)
     public SubjectResponse getSubjectById(Long id) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy môn học với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_FOUND, "Không tìm thấy môn học với ID: " + id));
         return subjectMapper.toResponse(subject);
     }
 
@@ -99,7 +101,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public void deleteSubject(Long id) {
         if (!subjectRepository.existsById(id)) {
-            throw new IllegalArgumentException("Không tìm thấy môn học với ID: " + id);
+            throw new AppException(ErrorCode.SUBJECT_NOT_FOUND, "Không tìm thấy môn học với ID: " + id);
         }
         subjectRepository.deleteById(id);
     }
