@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.SemesterRequest;
 import com.example.exe101_bioverse.exam.dto.response.SemesterResponse;
 import com.example.exe101_bioverse.exam.entity.Grade;
@@ -27,10 +29,10 @@ public class SemesterServiceImpl implements SemesterService {
     @Transactional
     public SemesterResponse createSemester(SemesterRequest request) {
         if (request.getClassId() == null) {
-            throw new IllegalArgumentException("classId không được để trống.");
+            throw new AppException(ErrorCode.INVALID_DATA, "classId không được để trống.");
         }
         Grade grade = classRepository.findById(request.getClassId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + request.getClassId()));
+                .orElseThrow(() -> new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp với ID: " + request.getClassId()));
 
         Semester semester = semesterMapper.toEntity(request);
         semester.setGrade(grade);
@@ -45,11 +47,11 @@ public class SemesterServiceImpl implements SemesterService {
     @Transactional
     public SemesterResponse updateSemester(Long id, SemesterRequest request) {
         Semester semester = semesterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND, "Không tìm thấy học kỳ với ID: " + id));
 
         if (request.getClassId() != null && !request.getClassId().equals(semester.getGrade().getId())) {
             Grade grade = classRepository.findById(request.getClassId())
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối lớp với ID: " + request.getClassId()));
+                    .orElseThrow(() -> new AppException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy khối lớp với ID: " + request.getClassId()));
             semester.setGrade(grade);
         }
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
@@ -71,7 +73,7 @@ public class SemesterServiceImpl implements SemesterService {
     @Transactional(readOnly = true)
     public SemesterResponse getSemesterById(Long id) {
         Semester semester = semesterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND, "Không tìm thấy học kỳ với ID: " + id));
         return semesterMapper.toResponse(semester);
     }
 
@@ -95,7 +97,7 @@ public class SemesterServiceImpl implements SemesterService {
     @Transactional
     public void deleteSemester(Long id) {
         if (!semesterRepository.existsById(id)) {
-            throw new IllegalArgumentException("Không tìm thấy học kỳ với ID: " + id);
+            throw new AppException(ErrorCode.SEMESTER_NOT_FOUND, "Không tìm thấy học kỳ với ID: " + id);
         }
         semesterRepository.deleteById(id);
     }

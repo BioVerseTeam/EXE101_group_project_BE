@@ -50,7 +50,33 @@ public enum ErrorCode {
     SYSTEM_LAB_PROTECTED(1508, "Không thể xóa hoặc đổi mã lab hệ thống", HttpStatus.FORBIDDEN),
     REACTION_NOT_FOUND(1509, "Không tìm thấy phương trình hoá học", HttpStatus.NOT_FOUND),
     REACTION_CODE_EXISTS(1510, "Mã phương trình đã tồn tại", HttpStatus.CONFLICT),
-    SYSTEM_REACTION_PROTECTED(1511, "Không thể ẩn hoặc đổi mã phương trình hệ thống", HttpStatus.FORBIDDEN);
+    SYSTEM_REACTION_PROTECTED(1511, "Không thể ẩn hoặc đổi mã phương trình hệ thống", HttpStatus.FORBIDDEN),
+
+    // Exam / Education 16xx
+    CLASS_NOT_FOUND(1601, "Không tìm thấy khối lớp", HttpStatus.NOT_FOUND),
+    CLASS_GRADE_EXISTS(1602, "Khối lớp đã tồn tại trong hệ thống", HttpStatus.CONFLICT),
+    SEMESTER_NOT_FOUND(1603, "Không tìm thấy học kỳ", HttpStatus.NOT_FOUND),
+    SUBJECT_NOT_FOUND(1604, "Không tìm thấy môn học", HttpStatus.NOT_FOUND),
+    EXAM_NOT_FOUND(1605, "Không tìm thấy đề thi", HttpStatus.NOT_FOUND),
+    QUESTION_NOT_FOUND(1606, "Không tìm thấy câu hỏi", HttpStatus.NOT_FOUND),
+    ANSWER_NOT_FOUND(1607, "Không tìm thấy đáp án", HttpStatus.NOT_FOUND),
+    EXAM_QUESTION_NOT_FOUND(1608, "Không tìm thấy câu hỏi trong đề thi", HttpStatus.NOT_FOUND),
+    QUESTION_IMAGE_NOT_FOUND(1609, "Không tìm thấy hình ảnh câu hỏi", HttpStatus.NOT_FOUND),
+    ANSWER_IMAGE_NOT_FOUND(1610, "Không tìm thấy hình ảnh đáp án", HttpStatus.NOT_FOUND),
+    UNSUPPORTED_RETURN_TYPE(1611, "Kiểu dữ liệu phản hồi không được hỗ trợ", HttpStatus.BAD_REQUEST),
+    EXAM_CODE_EXISTS(1612, "Mã đề thi đã tồn tại trong hệ thống", HttpStatus.CONFLICT),
+    EXAM_ATTEMPT_NOT_FOUND(1613, "Lượt làm bài thi không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),
+
+    // Subscription & Payment 17xx
+    PLAN_NOT_FOUND(1701, "Không tìm thấy gói cước", HttpStatus.NOT_FOUND),
+    PLAN_SLUG_EXISTS(1702, "Mã slug của gói cước đã tồn tại", HttpStatus.CONFLICT),
+    PLAN_NOT_ACTIVE(1703, "Gói cước hiện đang tạm ngừng kinh doanh", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_FOUND(1704, "Không tìm thấy giao dịch thanh toán", HttpStatus.NOT_FOUND),
+    PAYMENT_ALREADY_PROCESSED(1705, "Giao dịch đã được xử lý", HttpStatus.CONFLICT),
+    PAYOS_CONFIG_MISSING(1706, "Cấu hình cổng thanh toán PayOS chưa hoàn tất", HttpStatus.SERVICE_UNAVAILABLE),
+    PAYOS_SERVICE_ERROR(1707, "Lỗi kết nối cổng thanh toán PayOS", HttpStatus.BAD_GATEWAY),
+    INVALID_WEBHOOK_SIGNATURE(1708, "Chữ ký webhook không hợp lệ", HttpStatus.BAD_REQUEST),
+    PREMIUM_REQUIRED(1709, "Tính năng này chỉ dành cho tài khoản gói Premium", HttpStatus.PAYMENT_REQUIRED);
 
     private final int code;
     private final String message;

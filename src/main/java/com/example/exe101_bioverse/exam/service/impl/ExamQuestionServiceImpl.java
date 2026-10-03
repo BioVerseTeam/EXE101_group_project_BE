@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.ExamQuestionRequest;
 import com.example.exe101_bioverse.exam.dto.request.QuestionRequest;
 import com.example.exe101_bioverse.exam.dto.response.ExamQuestionResponse;
@@ -47,8 +49,8 @@ public class ExamQuestionServiceImpl implements ExamQuestionService {
                 examQuestion.setQuestion(questionService.internalGetById(examQuestionRequest.getQuestionId()));
                 examQuestion.setExam(examService.internalGetById(examQuestionRequest.getExamId()));
                 examQuestion = examQuestionRepository.save(examQuestion);
-            }else {
-                throw new RuntimeException("ExamQuestion with id " + examQuestionRequest.getId() + " not found");
+            } else {
+                throw new AppException(ErrorCode.EXAM_QUESTION_NOT_FOUND, "Không tìm thấy liên kết câu hỏi - đề thi với ID: " + examQuestionRequest.getId());
             }
         } else {
             examQuestion = examQuestionMapper.toEntity(examQuestionRequest);
@@ -58,7 +60,7 @@ public class ExamQuestionServiceImpl implements ExamQuestionService {
             examQuestion.setExam(examService.internalGetById(examQuestionRequest.getExamId()));
             examQuestion = examQuestionRepository.save(examQuestion);
         }
-        return  examQuestionMapper.toResponse(examQuestion);
+        return examQuestionMapper.toResponse(examQuestion);
     }
 
     @Override

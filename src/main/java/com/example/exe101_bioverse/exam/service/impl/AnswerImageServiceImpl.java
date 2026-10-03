@@ -1,5 +1,7 @@
 package com.example.exe101_bioverse.exam.service.impl;
 
+import com.example.exe101_bioverse.common.exception.AppException;
+import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.exam.dto.request.AnswerImageRequest;
 import com.example.exe101_bioverse.exam.dto.response.AnswerImageResponse;
 import com.example.exe101_bioverse.exam.entity.Answer;
@@ -35,7 +37,7 @@ public class AnswerImageServiceImpl implements AnswerImageService {
                 answerImage.setName(request.getName());
                 answerImage = answerImageRepository.save(answerImage);
             } else {
-                throw new RuntimeException("Answer image not found with id: " + request.getId());
+                throw new AppException(ErrorCode.ANSWER_IMAGE_NOT_FOUND, "Không tìm thấy hình ảnh đáp án với ID: " + request.getId());
             }
         } else {
             answerImage = answerImageMapper.toEntity(request);
@@ -69,5 +71,10 @@ public class AnswerImageServiceImpl implements AnswerImageService {
                 .toList();
     }
 
-
+    @Override
+    public void deleteAnswerImage(Long id) {
+        AnswerImage answerImage = answerImageRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ANSWER_IMAGE_NOT_FOUND, "Không tìm thấy hình ảnh đáp án với ID: " + id));
+        answerImageRepository.delete(answerImage);
+    }
 }
