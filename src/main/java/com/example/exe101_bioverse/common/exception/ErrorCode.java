@@ -65,7 +65,18 @@ public enum ErrorCode {
     ANSWER_IMAGE_NOT_FOUND(1610, "Không tìm thấy hình ảnh đáp án", HttpStatus.NOT_FOUND),
     UNSUPPORTED_RETURN_TYPE(1611, "Kiểu dữ liệu phản hồi không được hỗ trợ", HttpStatus.BAD_REQUEST),
     EXAM_CODE_EXISTS(1612, "Mã đề thi đã tồn tại trong hệ thống", HttpStatus.CONFLICT),
-    EXAM_ATTEMPT_NOT_FOUND(1613, "Lượt làm bài thi không tồn tại trong hệ thống", HttpStatus.NOT_FOUND);
+    EXAM_ATTEMPT_NOT_FOUND(1613, "Lượt làm bài thi không tồn tại trong hệ thống", HttpStatus.NOT_FOUND),
+
+    // Subscription & Payment 17xx
+    PLAN_NOT_FOUND(1701, "Không tìm thấy gói cước", HttpStatus.NOT_FOUND),
+    PLAN_SLUG_EXISTS(1702, "Mã slug của gói cước đã tồn tại", HttpStatus.CONFLICT),
+    PLAN_NOT_ACTIVE(1703, "Gói cước hiện đang tạm ngừng kinh doanh", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_FOUND(1704, "Không tìm thấy giao dịch thanh toán", HttpStatus.NOT_FOUND),
+    PAYMENT_ALREADY_PROCESSED(1705, "Giao dịch đã được xử lý", HttpStatus.CONFLICT),
+    PAYOS_CONFIG_MISSING(1706, "Cấu hình cổng thanh toán PayOS chưa hoàn tất", HttpStatus.SERVICE_UNAVAILABLE),
+    PAYOS_SERVICE_ERROR(1707, "Lỗi kết nối cổng thanh toán PayOS", HttpStatus.BAD_GATEWAY),
+    INVALID_WEBHOOK_SIGNATURE(1708, "Chữ ký webhook không hợp lệ", HttpStatus.BAD_REQUEST),
+    PREMIUM_REQUIRED(1709, "Tính năng này chỉ dành cho tài khoản gói Premium", HttpStatus.PAYMENT_REQUIRED);
 
     private final int code;
     private final String message;

@@ -8,26 +8,48 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class DotEnvLoader {
+public final class DotEnvLoader {
 
-    private static final Map<String, String> VALUES = load();
+    private static Map<String, String> VALUES = load();
+    private static Path LOADED_FROM;
 
     private DotEnvLoader() {
     }
 
-    static String get(String key) {
-        return VALUES.get(key);
+    public static synchronized String get(String key) {
+        String val = VALUES.get(key);
+        if (val == null || val.isBlank()) {
+            VALUES = load();
+            val = VALUES.get(key);
+        }
+        return val;
     }
 
-    static Map<String, String> asMap() {
+    public static synchronized void reload() {
+        VALUES = load();
+        loadIntoSystemProperties();
+    }
+
+    public static synchronized void loadIntoSystemProperties() {
+        if (VALUES == null || VALUES.isEmpty()) {
+            VALUES = load();
+        }
+        for (Map.Entry<String, String> entry : VALUES.entrySet()) {
+            if (entry.getValue() != null && !entry.getValue().isBlank()) {
+                if (System.getProperty(entry.getKey()) == null) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
+    public static Map<String, String> asMap() {
         return VALUES;
     }
 
-    static Path loadedFrom() {
+    public static Path loadedFrom() {
         return LOADED_FROM;
     }
-
-    private static Path LOADED_FROM;
 
     private static Map<String, String> load() {
         Path envFile = findEnvFile();

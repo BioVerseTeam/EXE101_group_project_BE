@@ -56,11 +56,15 @@ public class SecurityConfig {
                                 "/api/reactions/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/ai/chat"
+                                "/api/ai/chat",
+                                "/api/plans",
+                                "/api/plans/**",
+                                "/api/payments/payos/webhook"
                         ).permitAll()
                         .requestMatchers("/api/ai/conversations", "/api/ai/conversations/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/me", "/api/users/me/**").authenticated()
+                        .requestMatchers("/api/payments", "/api/payments/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex
