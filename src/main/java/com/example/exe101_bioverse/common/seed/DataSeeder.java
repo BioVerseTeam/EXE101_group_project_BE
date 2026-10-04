@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 @Component
+@Profile("local")
 @ConditionalOnProperty(name = "bioverse.seed.enabled", havingValue = "true", matchIfMissing = true)
 public class DataSeeder implements ApplicationRunner {
 
@@ -83,12 +85,7 @@ public class DataSeeder implements ApplicationRunner {
 
         for (SeedUser seed : seeds) {
             userRepository.findByEmail(seed.email()).ifPresentOrElse(
-                    user -> {
-                        user.setPasswordHash(passwordEncoder.encode(seed.password()));
-                        user.setUpdatedAt(now);
-                        userRepository.save(user);
-                        log.info("Refreshed password for seed user: {} / {}", seed.email(), seed.password());
-                    },
+                    user -> log.debug("Seed user {} already exists, skip seeding to preserve credentials", seed.email()),
                     () -> {
                         User user = User.builder()
                                 .email(seed.email())
