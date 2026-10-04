@@ -32,18 +32,25 @@ public class ExamController {
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getExams(
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false, defaultValue = "12") Integer size,
+            @RequestParam(required = false, defaultValue = "9") Integer size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) Integer grade,
+            @RequestParam(required = false) String examType,
             @RequestParam(required = false) String sort) {
-        if (page != null || (search != null && !search.isBlank()) || subjectId != null || grade != null) {
+        if (page != null || (search != null && !search.isBlank()) || subjectId != null || grade != null || (examType != null && !examType.isBlank())) {
             PageResponse<ExamCatalogResponse> catalog = examService.getExamCatalog(
-                    page != null ? page : 0, size != null ? size : 12, search, subjectId, grade, sort);
+                    page != null ? page : 0, size != null ? size : 9, search, subjectId, grade, examType, sort);
             return ResponseEntity.ok(ApiResponse.success(catalog, "Lấy danh sách đề thi thành công"));
         }
         List<ExamResponse> examResponses = examService.getAllExams();
         return ResponseEntity.ok(ApiResponse.success(examResponses));
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<ExamSummaryResponse>> getExamSummary() {
+        ExamSummaryResponse summary = examService.getExamSummary();
+        return ResponseEntity.ok(ApiResponse.success(summary, "Lấy tóm tắt đề thi thành công"));
     }
 
     @GetMapping("/{id}")
