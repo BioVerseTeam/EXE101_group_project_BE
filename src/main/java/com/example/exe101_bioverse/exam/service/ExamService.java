@@ -17,7 +17,11 @@ public interface ExamService {
     List<ExamResponse> getExamsByCode(String code);
 
     // New methods from EXAM_MANAGEMENT_API_SPECIFICATION
-    PageResponse<ExamCatalogResponse> getExamCatalog(int page, int size, String search, Long subjectId, Integer grade, String sort);
+    default PageResponse<ExamCatalogResponse> getExamCatalog(int page, int size, String search, Long subjectId, Integer grade, String sort) {
+        return getExamCatalog(page, size, search, subjectId, grade, null, sort);
+    }
+    PageResponse<ExamCatalogResponse> getExamCatalog(int page, int size, String search, Long subjectId, Integer grade, String examType, String sort);
+    ExamSummaryResponse getExamSummary();
     ExamResponse getExamById(Long id);
     ExamResponse updateExam(Long id, ExamUpdateRequest request);
     void deleteExam(Long id);

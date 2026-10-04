@@ -16,27 +16,64 @@ import com.example.exe101_bioverse.exam.repository.*;
 import com.example.exe101_bioverse.exam.service.ExamQuestionService;
 import com.example.exe101_bioverse.exam.service.ExamService;
 import com.example.exe101_bioverse.exam.service.QuestionService;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Slf4j
 @Service
 public class ExamServiceImpl implements ExamService {
+
+    @Autowired(required = false)
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired(required = false)
+    private ObjectMapper objectMapper;
+
+    private static final Duration CATALOG_CACHE_TTL = Duration.ofMinutes(15);
+    private static final Duration ALL_EXAMS_CACHE_TTL = Duration.ofMinutes(15);
+    private static final Duration SUMMARY_CACHE_TTL = Duration.ofMinutes(30);
+
+    @PostConstruct
+    public void init() {
+        if (this.objectMapper == null) {
+            this.objectMapper = new ObjectMapper();
+        }
+        this.objectMapper.findAndRegisterModules();
+    }
+
+    private void evictExamCache() {
+        if (redisTemplate == null) return;
+        try {
+            redisTemplate.delete("exam:all");
+            redisTemplate.delete("exam:summary");
+            Set<String> keys = redisTemplate.keys("exam:catalog:*");
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
+            log.info("[Redis Cache] Đã xóa cache cho đề thi (exam:all, exam:summary, {} catalog keys)", keys != null ? keys.size() : 0);
+        } catch (Exception e) {
+            log.warn("[Redis Cache] Lỗi khi xóa cache đề thi: {}", e.getMessage());
+        }
+    }
 
     @Autowired
     private ExamRepository examRepository;
@@ -106,6 +143,8 @@ public class ExamServiceImpl implements ExamService {
             }
         }
 
+        evictExamCache();
+
         if (returnType == Exam.class) {
             return returnType.cast(exam);
         } else if (returnType == ExamResponse.class) {
@@ -117,7 +156,21 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamResponse> getAllExams() {
-        return examRepository.findAll().stream()
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String cached = redisTemplate.opsForValue().get("exam:all");
+                if (cached != null && !cached.isBlank()) {
+                    JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, ExamResponse.class);
+                    List<ExamResponse> list = objectMapper.readValue(cached, type);
+                    log.info("[Redis Cache HIT] getAllExams -> {} đề thi", list.size());
+                    return list;
+                }
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi đọc exam:all: {}", e.getMessage());
+            }
+        }
+
+        List<ExamResponse> result = examRepository.findAll().stream()
                 .map(exam -> {
                     ExamResponse response = examMapper.toResponse(exam);
                     List<QuestionResponse> questions = questionService.getQuestionsByExamId(exam.getId());
@@ -125,6 +178,18 @@ public class ExamServiceImpl implements ExamService {
                     return response;
                 })
                 .toList();
+
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String json = objectMapper.writeValueAsString(result);
+                redisTemplate.opsForValue().set("exam:all", json, ALL_EXAMS_CACHE_TTL);
+                log.info("[Redis Cache SET] exam:all -> {} đề thi, TTL 15m", result.size());
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi lưu exam:all: {}", e.getMessage());
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -162,6 +227,33 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public PageResponse<ExamCatalogResponse> getExamCatalog(int page, int size, String search, Long subjectId, Integer grade, String sort) {
+        return getExamCatalog(page, size, search, subjectId, grade, null, sort);
+    }
+
+    @Override
+    public PageResponse<ExamCatalogResponse> getExamCatalog(int page, int size, String search, Long subjectId, Integer grade, String examType, String sort) {
+        String cacheKey = String.format("exam:catalog:p%d:s%d:q_%s:sub_%s:g_%s:t_%s:sort_%s",
+                page, size,
+                search != null ? search.trim().toLowerCase() : "",
+                subjectId != null ? subjectId.toString() : "",
+                grade != null ? grade.toString() : "",
+                examType != null ? examType.trim().toUpperCase() : "",
+                sort != null ? sort.trim() : "");
+
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String cached = redisTemplate.opsForValue().get(cacheKey);
+                if (cached != null && !cached.isBlank()) {
+                    JavaType type = objectMapper.getTypeFactory().constructParametricType(PageResponse.class, ExamCatalogResponse.class);
+                    PageResponse<ExamCatalogResponse> cachedResponse = objectMapper.readValue(cached, type);
+                    log.info("[Redis Cache HIT] {} -> {} items", cacheKey, cachedResponse.getItems() != null ? cachedResponse.getItems().size() : 0);
+                    return cachedResponse;
+                }
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi đọc {}: {}", cacheKey, e.getMessage());
+            }
+        }
+
         Sort sortOrder = Sort.by(Sort.Direction.DESC, "id");
         if (sort != null && !sort.isBlank()) {
             String[] parts = sort.split(",");
@@ -198,12 +290,155 @@ public class ExamServiceImpl implements ExamService {
                 Join<Semester, Grade> gradeJoin = semesterJoin.join("grade", JoinType.LEFT);
                 predicates.add(cb.equal(gradeJoin.get("grade"), grade));
             }
+            if (examType != null && !examType.isBlank()) {
+                String typeUpper = examType.trim().toUpperCase();
+                if ("GK1".equals(typeUpper)) {
+                    predicates.add(cb.or(
+                            cb.like(cb.lower(root.get("name")), "%giữa k%1%"),
+                            cb.like(cb.lower(root.get("code")), "%gk1%")
+                    ));
+                } else if ("HK1".equals(typeUpper)) {
+                    predicates.add(cb.or(
+                            cb.like(cb.lower(root.get("name")), "%học k%1%"),
+                            cb.like(cb.lower(root.get("code")), "%ck1%"),
+                            cb.like(cb.lower(root.get("code")), "%hk1%")
+                    ));
+                } else if ("GK2".equals(typeUpper)) {
+                    predicates.add(cb.or(
+                            cb.like(cb.lower(root.get("name")), "%giữa k%2%"),
+                            cb.like(cb.lower(root.get("code")), "%gk2%")
+                    ));
+                } else if ("HK2".equals(typeUpper)) {
+                    predicates.add(cb.or(
+                            cb.like(cb.lower(root.get("name")), "%học k%2%"),
+                            cb.like(cb.lower(root.get("code")), "%ck2%"),
+                            cb.like(cb.lower(root.get("code")), "%hk2%")
+                    ));
+                } else if ("OTHER".equals(typeUpper)) {
+                    predicates.add(cb.and(
+                            cb.notLike(cb.lower(root.get("code")), "%gk1%"),
+                            cb.notLike(cb.lower(root.get("code")), "%ck1%"),
+                            cb.notLike(cb.lower(root.get("code")), "%hk1%"),
+                            cb.notLike(cb.lower(root.get("code")), "%gk2%"),
+                            cb.notLike(cb.lower(root.get("code")), "%ck2%"),
+                            cb.notLike(cb.lower(root.get("code")), "%hk2%"),
+                            cb.notLike(cb.lower(root.get("name")), "%giữa k%"),
+                            cb.notLike(cb.lower(root.get("name")), "%học k%")
+                    ));
+                }
+            }
             return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
         };
 
         Page<Exam> examPage = examRepository.findAll(spec, pageable);
+        PageResponse<ExamCatalogResponse> pageResponse = PageResponse.from(examPage.map(this::mapToCatalogResponse));
 
-        return PageResponse.from(examPage.map(this::mapToCatalogResponse));
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String json = objectMapper.writeValueAsString(pageResponse);
+                redisTemplate.opsForValue().set(cacheKey, json, CATALOG_CACHE_TTL);
+                log.info("[Redis Cache SET] {} -> {} items, TTL 15m", cacheKey, pageResponse.getItems().size());
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi lưu {}: {}", cacheKey, e.getMessage());
+            }
+        }
+
+        return pageResponse;
+    }
+
+    @Override
+    public ExamSummaryResponse getExamSummary() {
+        String cacheKey = "exam:summary";
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String cached = redisTemplate.opsForValue().get(cacheKey);
+                if (cached != null && !cached.isBlank()) {
+                    ExamSummaryResponse summary = objectMapper.readValue(cached, ExamSummaryResponse.class);
+                    log.info("[Redis Cache HIT] exam:summary");
+                    return summary;
+                }
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi đọc exam:summary: {}", e.getMessage());
+            }
+        }
+
+        List<Exam> exams = examRepository.findAll();
+        long total = exams.size();
+        Map<String, Long> gradeCounts = new HashMap<>();
+        gradeCounts.put("6", 0L);
+        gradeCounts.put("7", 0L);
+        gradeCounts.put("8", 0L);
+        gradeCounts.put("9", 0L);
+
+        Map<String, Long> typeCounts = new HashMap<>();
+        typeCounts.put("GK1", 0L);
+        typeCounts.put("HK1", 0L);
+        typeCounts.put("GK2", 0L);
+        typeCounts.put("HK2", 0L);
+        typeCounts.put("OTHER", 0L);
+
+        Set<String> subjectSet = new TreeSet<>();
+
+        for (Exam ex : exams) {
+            Integer g = extractGrade(ex);
+            if (g != null && gradeCounts.containsKey(String.valueOf(g))) {
+                gradeCounts.put(String.valueOf(g), gradeCounts.get(String.valueOf(g)) + 1);
+            }
+
+            String t = extractExamType(ex);
+            typeCounts.put(t, typeCounts.getOrDefault(t, 0L) + 1);
+
+            String sName = ex.getSubject() != null ? ex.getSubject().getName() : ex.getSubjectName();
+            if (sName != null && !sName.isBlank()) {
+                String clean = sName.replaceAll("\\s*\\([^)]*\\)\\s*", " ").replaceAll("\\s*-\\s*HK\\d+", "").trim();
+                if (!clean.isBlank()) subjectSet.add(clean);
+            }
+        }
+
+        ExamSummaryResponse summary = ExamSummaryResponse.builder()
+                .totalExams(total)
+                .gradeCounts(gradeCounts)
+                .typeCounts(typeCounts)
+                .subjects(new ArrayList<>(subjectSet))
+                .build();
+
+        if (redisTemplate != null && objectMapper != null) {
+            try {
+                String json = objectMapper.writeValueAsString(summary);
+                redisTemplate.opsForValue().set(cacheKey, json, SUMMARY_CACHE_TTL);
+                log.info("[Redis Cache SET] exam:summary, TTL 30m");
+            } catch (Exception e) {
+                log.warn("[Redis Cache] Lỗi lưu exam:summary: {}", e.getMessage());
+            }
+        }
+
+        return summary;
+    }
+
+    private Integer extractGrade(Exam exam) {
+        try {
+            if (exam.getSubject() != null && exam.getSubject().getSemester() != null && exam.getSubject().getSemester().getGrade() != null) {
+                return exam.getSubject().getSemester().getGrade().getGrade();
+            }
+        } catch (Exception ignored) {}
+        String text = ((exam.getName() != null ? exam.getName() : "") + " " +
+                (exam.getSubjectName() != null ? exam.getSubjectName() : "") + " " +
+                (exam.getCode() != null ? exam.getCode() : "")).toLowerCase();
+        if (text.contains("khtn 6") || text.contains("khtn6") || text.contains("lớp 6") || text.contains("khoa học tự nhiên 6")) return 6;
+        if (text.contains("khtn 7") || text.contains("khtn7") || text.contains("lớp 7") || text.contains("khoa học tự nhiên 7")) return 7;
+        if (text.contains("khtn 8") || text.contains("khtn8") || text.contains("lớp 8") || text.contains("khoa học tự nhiên 8")) return 8;
+        if (text.contains("khtn 9") || text.contains("khtn9") || text.contains("lớp 9") || text.contains("khoa học tự nhiên 9")) return 9;
+        return null;
+    }
+
+    private String extractExamType(Exam exam) {
+        String text = ((exam.getName() != null ? exam.getName() : "") + " " +
+                (exam.getCode() != null ? exam.getCode() : "")).toLowerCase();
+        if (text.contains("gk1") || text.contains("giữa kì 1") || text.contains("giữa kỳ 1")) return "GK1";
+        if (text.contains("hk1") || text.contains("ck1") || text.contains("học kì 1") || text.contains("học kỳ 1")) return "HK1";
+        if (text.contains("gk2") || text.contains("giữa kì 2") || text.contains("giữa kỳ 2")) return "GK2";
+        if (text.contains("hk2") || text.contains("ck2") || text.contains("học kì 2") || text.contains("học kỳ 2")) return "HK2";
+        return "OTHER";
     }
 
     private ExamCatalogResponse mapToCatalogResponse(Exam exam) {
@@ -303,6 +538,7 @@ public class ExamServiceImpl implements ExamService {
         exam.setUpdatedDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
 
         exam = examRepository.save(exam);
+        evictExamCache();
         ExamResponse response = examMapper.toResponse(exam);
         response.setQuestions(questionService.getQuestionsByExamId(id));
         return response;
@@ -314,6 +550,7 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.EXAM_NOT_FOUND, "Không tìm thấy đề thi với ID: " + id));
         examRepository.delete(exam);
+        evictExamCache();
     }
 
     @Override
@@ -356,6 +593,8 @@ public class ExamServiceImpl implements ExamService {
             examQuestionRepository.save(newEq);
             clonedCount++;
         }
+
+        evictExamCache();
 
         return ExamDuplicateResponse.builder()
                 .id(newExam.getId())
@@ -470,6 +709,8 @@ public class ExamServiceImpl implements ExamService {
             count++;
         }
 
+        evictExamCache();
+
         return ExamReorderResponse.builder()
                 .totalQuestions(count)
                 .totalPoints(Math.round(totalPoints * 100.0) / 100.0)
@@ -538,6 +779,8 @@ public class ExamServiceImpl implements ExamService {
                 .build();
         eq = examQuestionRepository.save(eq);
 
+        evictExamCache();
+
         return CompositeQuestionResponse.builder()
                 .examQuestionId(eq.getId())
                 .questionId(question.getId())
@@ -558,6 +801,7 @@ public class ExamServiceImpl implements ExamService {
                 .orElseThrow(() -> new AppException(ErrorCode.EXAM_QUESTION_NOT_FOUND,
                         "Không tìm thấy câu hỏi ID " + questionId + " trong đề thi ID " + examId));
         examQuestionRepository.delete(eq);
+        evictExamCache();
     }
 
     @Override
@@ -588,6 +832,8 @@ public class ExamServiceImpl implements ExamService {
             eq = examQuestionRepository.save(eq);
             responses.add(examQuestionMapper.toResponse(eq));
         }
+
+        evictExamCache();
 
         return responses;
     }
