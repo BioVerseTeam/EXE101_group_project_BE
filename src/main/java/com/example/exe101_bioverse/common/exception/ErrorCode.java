@@ -76,7 +76,12 @@ public enum ErrorCode {
     PAYOS_CONFIG_MISSING(1706, "Cấu hình cổng thanh toán PayOS chưa hoàn tất", HttpStatus.SERVICE_UNAVAILABLE),
     PAYOS_SERVICE_ERROR(1707, "Lỗi kết nối cổng thanh toán PayOS", HttpStatus.BAD_GATEWAY),
     INVALID_WEBHOOK_SIGNATURE(1708, "Chữ ký webhook không hợp lệ", HttpStatus.BAD_REQUEST),
-    PREMIUM_REQUIRED(1709, "Tính năng này chỉ dành cho tài khoản gói Premium", HttpStatus.PAYMENT_REQUIRED);
+    PREMIUM_REQUIRED(1709, "Tính năng này chỉ dành cho tài khoản gói Premium", HttpStatus.PAYMENT_REQUIRED),
+
+    // Badge 152x
+    BADGE_NOT_FOUND(1520, "Không tìm thấy danh hiệu STEM", HttpStatus.NOT_FOUND),
+    BADGE_CODE_EXISTS(1521, "Mã danh hiệu đã tồn tại", HttpStatus.CONFLICT);
+
 
     private final int code;
     private final String message;
