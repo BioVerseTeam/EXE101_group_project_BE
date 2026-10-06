@@ -12,21 +12,43 @@ import java.util.List;
  */
 public interface BioModelService {
 
-    /** Lấy danh sách model phổ biến (featured) cho trang chủ. */
+    /**
+     * Lấy danh sách model phổ biến (featured) cho trang chủ.
+     */
     List<ModelSummaryResponse> getFeaturedModels();
 
-    /** Phân trang danh mục với bộ lọc. */
+    /**
+     * Phân trang danh mục với bộ lọc.
+     */
     PageResponse<ModelSummaryResponse> getCatalog(Integer grade, String category, String subject, String q, int page, int size);
 
-    /** Xem chi tiết model theo ID. */
+    /**
+     * Xem chi tiết model theo ID.
+     */
     ModelDetailResponse getModelById(Long id);
 
-    /** Xem chi tiết model theo slug. */
+    /**
+     * Xem chi tiết model theo slug.
+     */
     ModelDetailResponse getModelBySlug(String slug);
 
-    /** Lấy danh sách thể loại (category) riêng biệt, có thể lọc theo môn. */
+    /**
+     * Lấy danh sách thể loại (category) riêng biệt, có thể lọc theo môn.
+     */
     List<String> getCategories(String subject);
 
-    /** Lab đang mở cho catalog / nhân mẫu. */
+    /**
+     * Lab đang mở cho catalog / nhân mẫu.
+     */
     List<LabResponse> getLabs();
+
+    /**
+     * Lấy bài kiểm tra 3D theo Model ID.
+     */
+    com.example.exe101_bioverse.exam.dto.response.StudentExamPaperResponse getExamByModelId(Long id);
+
+    /**
+     * Lấy bài kiểm tra 3D theo Model Slug.
+     */
+    com.example.exe101_bioverse.exam.dto.response.StudentExamPaperResponse getExamByModelSlug(String slug);
 }

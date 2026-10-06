@@ -27,14 +27,14 @@ public class BioModelController {
 
     @GetMapping("/featured")
     @Operation(summary = "Lấy danh sách mô hình phổ biến cho trang chủ",
-               description = "Trả về các model 3D được Admin đánh dấu is_featured = true, sắp xếp theo sort_order ASC.")
+            description = "Trả về các model 3D được Admin đánh dấu is_featured = true, sắp xếp theo sort_order ASC.")
     public ResponseEntity<ApiResponse<List<ModelSummaryResponse>>> getFeaturedModels() {
         return ResponseEntity.ok(ApiResponse.success(bioModelService.getFeaturedModels()));
     }
 
     @GetMapping("/catalog")
     @Operation(summary = "Danh mục mô hình 3D có phân trang và bộ lọc",
-               description = "Hỗ trợ lọc theo khối lớp (grade), thể loại (category), môn học (subject) và tìm kiếm từ khóa (q).")
+            description = "Hỗ trợ lọc theo khối lớp (grade), thể loại (category), môn học (subject) và tìm kiếm từ khóa (q).")
     public ResponseEntity<ApiResponse<PageResponse<ModelSummaryResponse>>> getCatalog(
             @Parameter(description = "Khối lớp: 6, 7, 8, 9") @RequestParam(required = false) Integer grade,
             @Parameter(description = "Thể loại: Hệ thần kinh, Hệ tiêu hóa,...") @RequestParam(required = false) String category,
@@ -48,21 +48,37 @@ public class BioModelController {
 
     @GetMapping("/detail/{id}")
     @Operation(summary = "Xem chi tiết mô hình 3D theo ID",
-               description = "Tự động tăng lượt xem (views_count) mỗi lần gọi.")
+            description = "Tự động tăng lượt xem (views_count) mỗi lần gọi.")
     public ResponseEntity<ApiResponse<ModelDetailResponse>> getModelById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(bioModelService.getModelById(id)));
     }
 
     @GetMapping("/slug/{slug}")
     @Operation(summary = "Xem chi tiết mô hình 3D theo slug",
-               description = "Dùng URL-friendly slug thay vì ID. Tự động tăng lượt xem.")
+            description = "Dùng URL-friendly slug thay vì ID. Tự động tăng lượt xem.")
     public ResponseEntity<ApiResponse<ModelDetailResponse>> getModelBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.success(bioModelService.getModelBySlug(slug)));
     }
 
+    @GetMapping("/{id}/exam")
+    @Operation(summary = "Lấy đề thi trắc nghiệm tương tác cho mô hình 3D theo ID",
+            description = "Trả về đề thi chống gian lận (Anti-Cheat Paper) gắn với mô hình 3D này để học sinh làm bài.")
+    public ResponseEntity<ApiResponse<com.example.exe101_bioverse.exam.dto.response.StudentExamPaperResponse>> getExamByModelId(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(bioModelService.getExamByModelId(id)));
+    }
+
+    @GetMapping("/slug/{slug}/exam")
+    @Operation(summary = "Lấy đề thi trắc nghiệm tương tác cho mô hình 3D theo slug",
+            description = "Trả về đề thi chống gian lận (Anti-Cheat Paper) gắn với mô hình 3D theo slug để học sinh làm bài.")
+    public ResponseEntity<ApiResponse<com.example.exe101_bioverse.exam.dto.response.StudentExamPaperResponse>> getExamByModelSlug(
+            @PathVariable String slug) {
+        return ResponseEntity.ok(ApiResponse.success(bioModelService.getExamByModelSlug(slug)));
+    }
+
     @GetMapping("/categories")
     @Operation(summary = "Lấy danh sách thể loại mô hình",
-               description = "Trả về các loại mẫu admin đang bật. Có thể lọc theo môn học.")
+            description = "Trả về các loại mẫu admin đang bật. Có thể lọc theo môn học.")
     public ResponseEntity<ApiResponse<List<String>>> getCategories(
             @Parameter(description = "Môn học: BIOLOGY, CHEMISTRY, PHYSICS") @RequestParam(required = false) String subject
     ) {
