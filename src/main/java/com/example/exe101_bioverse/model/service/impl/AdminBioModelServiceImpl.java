@@ -114,36 +114,90 @@ public class AdminBioModelServiceImpl implements AdminBioModelService {
         }
 
         // Chỉ cập nhật các field được gửi (non-null)
-        if (request.getName() != null) model.setName(request.getName());
-        if (request.getNameEn() != null) model.setNameEn(request.getNameEn());
-        if (request.getSlug() != null) model.setSlug(request.getSlug());
-        if (request.getScientificName() != null) model.setScientificName(request.getScientificName());
-        if (request.getCategory() != null) model.setCategory(request.getCategory());
-        if (request.getDescription() != null) model.setDescription(request.getDescription());
-        if (request.getHabitat() != null) model.setHabitat(request.getHabitat());
-        if (request.getCharacteristics() != null) model.setCharacteristics(request.getCharacteristics());
-        if (request.getClassification() != null) model.setClassification(request.getClassification());
-        if (request.getFunFacts() != null) model.setFunFacts(request.getFunFacts());
+        if (request.getName() != null) {
+            model.setName(request.getName());
+        }
+        if (request.getNameEn() != null) {
+            model.setNameEn(request.getNameEn());
+        }
+        if (request.getSlug() != null) {
+            model.setSlug(request.getSlug());
+        }
+        if (request.getScientificName() != null) {
+            model.setScientificName(request.getScientificName());
+        }
+        if (request.getCategory() != null) {
+            model.setCategory(request.getCategory());
+        }
+        if (request.getDescription() != null) {
+            model.setDescription(request.getDescription());
+        }
+        if (request.getHabitat() != null) {
+            model.setHabitat(request.getHabitat());
+        }
+        if (request.getCharacteristics() != null) {
+            model.setCharacteristics(request.getCharacteristics());
+        }
+        if (request.getClassification() != null) {
+            model.setClassification(request.getClassification());
+        }
+        if (request.getFunFacts() != null) {
+            model.setFunFacts(request.getFunFacts());
+        }
         if (request.getGrade() != null) {
             model.setGrade(request.getGrade() == 0 ? null : request.getGrade());
         }
-        if (request.getSubject() != null) model.setSubject(request.getSubject());
-        if (request.getBadgeText() != null) model.setBadgeText(request.getBadgeText());
-        if (request.getActionText() != null) model.setActionText(request.getActionText());
-        if (request.getActionIcon() != null) model.setActionIcon(request.getActionIcon());
-        if (request.getTargetMode() != null) model.setTargetMode(request.getTargetMode());
-        if (request.getModelUrl() != null) model.setModelUrl(request.getModelUrl());
-        if (request.getThumbnailUrl() != null) model.setThumbnailUrl(request.getThumbnailUrl());
-        if (request.getModelFormat() != null) model.setModelFormat(request.getModelFormat());
-        if (request.getModelSizeBytes() != null) model.setModelSizeBytes(request.getModelSizeBytes());
-        if (request.getDefaultScale() != null) model.setDefaultScale(request.getDefaultScale());
-        if (request.getDefaultRotation() != null) model.setDefaultRotation(request.getDefaultRotation());
-        if (request.getCameraPosition() != null) model.setCameraPosition(request.getCameraPosition());
-        if (request.getAnnotations() != null) model.setAnnotations(request.getAnnotations());
-        if (request.getIsFeatured() != null) model.setIsFeatured(request.getIsFeatured());
-        if (request.getIsActive() != null) model.setIsActive(request.getIsActive());
-        if (request.getSortOrder() != null) model.setSortOrder(request.getSortOrder());
-        if (request.getLessonId() != null) model.setLessonId(request.getLessonId());
+        if (request.getSubject() != null) {
+            model.setSubject(request.getSubject());
+        }
+        if (request.getBadgeText() != null) {
+            model.setBadgeText(request.getBadgeText());
+        }
+        if (request.getActionText() != null) {
+            model.setActionText(request.getActionText());
+        }
+        if (request.getActionIcon() != null) {
+            model.setActionIcon(request.getActionIcon());
+        }
+        if (request.getTargetMode() != null) {
+            model.setTargetMode(request.getTargetMode());
+        }
+        if (request.getModelUrl() != null) {
+            model.setModelUrl(request.getModelUrl());
+        }
+        if (request.getThumbnailUrl() != null) {
+            model.setThumbnailUrl(request.getThumbnailUrl());
+        }
+        if (request.getModelFormat() != null) {
+            model.setModelFormat(request.getModelFormat());
+        }
+        if (request.getModelSizeBytes() != null) {
+            model.setModelSizeBytes(request.getModelSizeBytes());
+        }
+        if (request.getDefaultScale() != null) {
+            model.setDefaultScale(request.getDefaultScale());
+        }
+        if (request.getDefaultRotation() != null) {
+            model.setDefaultRotation(request.getDefaultRotation());
+        }
+        if (request.getCameraPosition() != null) {
+            model.setCameraPosition(request.getCameraPosition());
+        }
+        if (request.getAnnotations() != null) {
+            model.setAnnotations(request.getAnnotations());
+        }
+        if (request.getIsFeatured() != null) {
+            model.setIsFeatured(request.getIsFeatured());
+        }
+        if (request.getIsActive() != null) {
+            model.setIsActive(request.getIsActive());
+        }
+        if (request.getSortOrder() != null) {
+            model.setSortOrder(request.getSortOrder());
+        }
+        if (request.getLessonId() != null) {
+            model.setLessonId(request.getLessonId());
+        }
 
         if (request.getCategory() != null) {
             categoryService.ensureNamed(request.getCategory());
