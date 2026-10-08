@@ -18,6 +18,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.exe101_bioverse.exam.dto.response.StudentExamPaperResponse;
+import com.example.exe101_bioverse.exam.entity.Exam;
+import com.example.exe101_bioverse.exam.repository.ExamRepository;
+import com.example.exe101_bioverse.exam.service.StudentExamService;
+
 import java.util.List;
 
 @Service
@@ -27,15 +32,21 @@ public class BioModelServiceImpl implements BioModelService {
     private final BioModelRepository bioModelRepository;
     private final BioModelCategoryService categoryService;
     private final BioLabService labService;
+    private final ExamRepository examRepository;
+    private final StudentExamService studentExamService;
 
     public BioModelServiceImpl(
             BioModelRepository bioModelRepository,
             BioModelCategoryService categoryService,
-            BioLabService labService
+            BioLabService labService,
+            ExamRepository examRepository,
+            StudentExamService studentExamService
     ) {
         this.bioModelRepository = bioModelRepository;
         this.categoryService = categoryService;
         this.labService = labService;
+        this.examRepository = examRepository;
+        this.studentExamService = studentExamService;
     }
 
     @Override
@@ -72,7 +83,11 @@ public class BioModelServiceImpl implements BioModelService {
         // Tăng lượt xem
         bioModelRepository.incrementViewCount(id);
 
-        return ModelDetailResponse.from(model);
+        Exam exam = findExamForModel(model);
+        Long examId = exam != null ? exam.getId() : null;
+        String examCode = exam != null ? exam.getCode() : null;
+
+        return ModelDetailResponse.from(model, examId, examCode);
     }
 
     @Override
@@ -84,7 +99,43 @@ public class BioModelServiceImpl implements BioModelService {
         // Tăng lượt xem
         bioModelRepository.incrementViewCount(model.getId());
 
-        return ModelDetailResponse.from(model);
+        Exam exam = findExamForModel(model);
+        Long examId = exam != null ? exam.getId() : null;
+        String examCode = exam != null ? exam.getCode() : null;
+
+        return ModelDetailResponse.from(model, examId, examCode);
+    }
+
+    @Override
+    public StudentExamPaperResponse getExamByModelId(Long id) {
+        BioModel model = bioModelRepository.findByIdAndIsActiveTrue(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
+
+        Exam exam = findExamForModel(model);
+        if (exam == null) {
+            throw new AppException(ErrorCode.EXAM_NOT_FOUND);
+        }
+
+        return studentExamService.getAntiCheatExamPaper(exam.getId());
+    }
+
+    @Override
+    public StudentExamPaperResponse getExamByModelSlug(String slug) {
+        BioModel model = bioModelRepository.findBySlugAndIsActiveTrue(slug)
+                .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
+
+        Exam exam = findExamForModel(model);
+        if (exam == null) {
+            throw new AppException(ErrorCode.EXAM_NOT_FOUND);
+        }
+
+        return studentExamService.getAntiCheatExamPaper(exam.getId());
+    }
+
+    private Exam findExamForModel(BioModel model) {
+        return examRepository.findByModelId(model.getId())
+                .or(() -> examRepository.findFirstByCode("QUIZ_MODEL_" + model.getSlug()))
+                .orElse(null);
     }
 
     @Override

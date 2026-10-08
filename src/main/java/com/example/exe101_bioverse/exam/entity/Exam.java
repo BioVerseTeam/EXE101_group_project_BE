@@ -45,6 +45,9 @@ public class Exam {
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
+    @Column(name = "model_id")
+    private Long modelId;
+
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExamQuestion> examQuestions;
 }

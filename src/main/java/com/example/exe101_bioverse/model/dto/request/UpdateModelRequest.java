@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * DTO cho Admin cập nhật thông tin mô hình 3D.
- * Tất cả field đều optional - chỉ cập nhật field được gửi.
+ * DTO cho Admin cập nhật thông tin mô hình 3D. Tất cả field đều optional - chỉ
+ * cập nhật field được gửi.
  */
 @Data
 @Builder
