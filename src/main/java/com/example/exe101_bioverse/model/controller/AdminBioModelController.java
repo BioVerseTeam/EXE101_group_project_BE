@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/models")
+@RequestMapping({"/api/admin/models", "/api/admin/bio-models"})
 @PreAuthorize("hasRole('ADMIN')")
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Admin Bio Models", description = "API quản trị mô hình 3D - Chỉ dành cho Admin")

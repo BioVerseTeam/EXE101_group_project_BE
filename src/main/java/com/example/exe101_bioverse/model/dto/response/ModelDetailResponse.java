@@ -10,8 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * DTO chi tiết đầy đủ khi xem một model cụ thể.
- * Bao gồm thông tin giải phẫu, thiết lập camera 3D, annotations, và metadata.
+ * DTO chi tiết đầy đủ khi xem một model cụ thể. Bao gồm thông tin giải phẫu,
+ * thiết lập camera 3D, annotations, và metadata.
  */
 @Data
 @Builder
@@ -49,6 +49,10 @@ public class ModelDetailResponse {
     private String cameraPosition;       // JSONB as String
     private String annotations;          // JSONB as String
 
+    // Quiz / Exam associated with this 3D model
+    private Long examId;
+    private String examCode;
+
     // Stats
     private Long viewsCount;
     private Boolean isFeatured;
@@ -56,6 +60,13 @@ public class ModelDetailResponse {
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static ModelDetailResponse from(BioModel model, Long examId, String examCode) {
+        ModelDetailResponse response = from(model);
+        response.setExamId(examId);
+        response.setExamCode(examCode);
+        return response;
+    }
 
     public static ModelDetailResponse from(BioModel model) {
         return ModelDetailResponse.builder()
