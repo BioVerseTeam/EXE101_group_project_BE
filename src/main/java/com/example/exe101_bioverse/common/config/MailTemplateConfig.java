@@ -2,6 +2,7 @@ package com.example.exe101_bioverse.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -9,6 +10,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
+@EnableAsync
 public class MailTemplateConfig {
 
     @Bean(name = "emailTemplateEngine")

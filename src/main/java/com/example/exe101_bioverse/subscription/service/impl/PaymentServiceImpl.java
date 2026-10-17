@@ -2,6 +2,7 @@ package com.example.exe101_bioverse.subscription.service.impl;
 
 import com.example.exe101_bioverse.auth.entity.User;
 import com.example.exe101_bioverse.auth.repository.UserRepository;
+import com.example.exe101_bioverse.auth.service.MailService;
 import com.example.exe101_bioverse.common.exception.AppException;
 import com.example.exe101_bioverse.common.exception.ErrorCode;
 import com.example.exe101_bioverse.common.response.PageResponse;
@@ -56,8 +57,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final PayosConfig payosConfig;
     private final PayOS payOS;
     private final ObjectMapper objectMapper;
+    private final MailService mailService;
 
     private PayOS getActivePayOS() {
+        if (payOS != null) {
+            return payOS;
+        }
         if (payosConfig.isConfigured()) {
             return new PayOS(
                     payosConfig.getClientId().trim(),
@@ -198,14 +203,29 @@ public class PaymentServiceImpl implements PaymentService {
             log.warn("Could not serialize webhookData: {}", e.getMessage());
         }
 
+        // Kiểm tra mã kết quả từ PayOS (00 là thành công)
+        if (webhookData.getCode() != null && !"00".equals(webhookData.getCode())) {
+            String failDesc = webhookData.getDesc() != null && !webhookData.getDesc().isBlank()
+                    ? webhookData.getDesc()
+                    : "Giao dịch không thành công trên cổng PayOS (mã: " + webhookData.getCode() + ")";
+            log.warn("PayOS webhook reported failure for orderCode {}: {}", orderCode, failDesc);
+            payment.setStatus(PaymentStatus.FAILED);
+            payment.setFailedReason(failDesc);
+            paymentRepository.save(payment);
+            notifyPaymentFailed(payment, failDesc);
+            return;
+        }
+
         // Kiểm tra số tiền
         BigDecimal expectedAmount = payment.getAmount();
         BigDecimal receivedAmount = BigDecimal.valueOf(webhookData.getAmount());
         if (expectedAmount.compareTo(receivedAmount) != 0) {
             log.error("Amount mismatch for orderCode {}: expected {}, received {}", orderCode, expectedAmount, receivedAmount);
+            String failReason = "Số tiền thanh toán không khớp: dự kiến " + expectedAmount + ", thực nhận " + receivedAmount;
             payment.setStatus(PaymentStatus.FAILED);
-            payment.setFailedReason("Số tiền thanh toán không khớp: dự kiến " + expectedAmount + ", thực nhận " + receivedAmount);
+            payment.setFailedReason(failReason);
             paymentRepository.save(payment);
+            notifyPaymentFailed(payment, failReason);
             return;
         }
 
@@ -217,14 +237,16 @@ public class PaymentServiceImpl implements PaymentService {
         }
         paymentRepository.save(payment);
 
+        Subscription activatedSub = null;
         if (payment.getSubscription() != null && payment.getSubscription().getPlan() != null) {
-            subscriptionService.activateSubscription(
+            activatedSub = subscriptionService.activateSubscription(
                     payment.getUser().getId(),
                     payment.getSubscription().getPlan(),
                     payment.getSubscription().getId()
             );
         }
 
+        notifyPaymentSuccess(payment, activatedSub);
         log.info("Payment orderCode {} processed successfully via webhook!", orderCode);
     }
 
@@ -244,19 +266,38 @@ public class PaymentServiceImpl implements PaymentService {
                 if (linkInfo != null && linkInfo.getStatus() == PaymentLinkStatus.PAID) {
                     log.info("Actively synced payment status PAID from PayOS for orderCode {}", orderCode);
                     payment.setStatus(PaymentStatus.PAID);
-                    payment.setPaidAt(LocalDateTime.now());
+                    if (payment.getPaidAt() == null) {
+                        payment.setPaidAt(LocalDateTime.now());
+                    }
                     paymentRepository.save(payment);
 
+                    Subscription activatedSub = null;
                     if (payment.getSubscription() != null && payment.getSubscription().getPlan() != null) {
-                        subscriptionService.activateSubscription(
+                        activatedSub = subscriptionService.activateSubscription(
                                 payment.getUser().getId(),
                                 payment.getSubscription().getPlan(),
                                 payment.getSubscription().getId()
                         );
                     }
+                    notifyPaymentSuccess(payment, activatedSub);
                 } else if (linkInfo != null && linkInfo.getStatus() == PaymentLinkStatus.CANCELLED) {
                     payment.setStatus(PaymentStatus.CANCELLED);
+                    String reason = "Đơn thanh toán đã bị hủy trên cổng PayOS";
+                    payment.setFailedReason(reason);
                     paymentRepository.save(payment);
+                    notifyPaymentFailed(payment, reason);
+                } else if (linkInfo != null && linkInfo.getStatus() == PaymentLinkStatus.EXPIRED) {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    String reason = "Đơn thanh toán đã hết hạn trên cổng PayOS";
+                    payment.setFailedReason(reason);
+                    paymentRepository.save(payment);
+                    notifyPaymentFailed(payment, reason);
+                } else if (linkInfo != null && (linkInfo.getStatus() == PaymentLinkStatus.FAILED || linkInfo.getStatus() == PaymentLinkStatus.UNDERPAID)) {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    String reason = "Thanh toán không thành công trên cổng PayOS (" + linkInfo.getStatus() + ")";
+                    payment.setFailedReason(reason);
+                    paymentRepository.save(payment);
+                    notifyPaymentFailed(payment, reason);
                 }
             } catch (Exception e) {
                 log.warn("Could not actively sync payment status from PayOS: {}", e.getMessage());
@@ -280,7 +321,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         payment.setStatus(PaymentStatus.CANCELLED);
-        payment.setFailedReason("Người dùng hủy thanh toán");
+        String reason = "Người dùng hủy thanh toán";
+        payment.setFailedReason(reason);
         paymentRepository.save(payment);
 
         if (payosConfig.isConfigured()) {
@@ -291,7 +333,72 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
+        notifyPaymentFailed(payment, reason);
         return PaymentResponse.from(payment);
+    }
+
+    private void notifyPaymentSuccess(Payment payment, Subscription activatedSub) {
+        if (payment.getEmailNotifiedAt() != null) {
+            return;
+        }
+        User user = payment.getUser();
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            return;
+        }
+
+        payment.setEmailNotifiedAt(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        String planName = null;
+        LocalDateTime endDate = null;
+        if (activatedSub != null) {
+            endDate = activatedSub.getEndDate();
+            if (activatedSub.getPlan() != null) {
+                planName = activatedSub.getPlan().getName();
+            }
+        }
+        if (planName == null && payment.getSubscription() != null && payment.getSubscription().getPlan() != null) {
+            planName = payment.getSubscription().getPlan().getName();
+        }
+
+        mailService.sendPaymentSuccess(
+                user.getEmail(),
+                user.getFullName(),
+                payment.getOrderCode(),
+                planName,
+                payment.getAmount(),
+                payment.getPaidAt(),
+                endDate,
+                payment.getPayosTransactionId()
+        );
+    }
+
+    private void notifyPaymentFailed(Payment payment, String reason) {
+        if (payment.getEmailNotifiedAt() != null) {
+            return;
+        }
+        User user = payment.getUser();
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            return;
+        }
+
+        payment.setEmailNotifiedAt(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        String planName = null;
+        if (payment.getSubscription() != null && payment.getSubscription().getPlan() != null) {
+            planName = payment.getSubscription().getPlan().getName();
+        }
+
+        mailService.sendPaymentFailed(
+                user.getEmail(),
+                user.getFullName(),
+                payment.getOrderCode(),
+                planName,
+                payment.getAmount(),
+                payment.getUpdatedAt() != null ? payment.getUpdatedAt() : LocalDateTime.now(),
+                reason != null ? reason : payment.getFailedReason()
+        );
     }
 
     @Override

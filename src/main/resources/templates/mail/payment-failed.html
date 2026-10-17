@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="color-scheme" content="light only"/>
+    <title th:text="'Thông báo thanh toán chưa hoàn tất đơn hàng #' + ${orderCode} + ' · BioVerse'">Thanh toán chưa hoàn tất BioVerse</title>
+    <!--[if !mso]><!-->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Epilogue:wght@700;800&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+    <!--<![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#fdfbf7;font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif;color:#2d2d2d;-webkit-font-smoothing:antialiased;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    Thông báo: Đơn hàng #<span th:text="${orderCode}">000000</span> chưa hoàn tất thanh toán trên BioVerse.
+</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#fdfbf7;background-image:radial-gradient(#dcd5cb 1.5px, transparent 1.5px);background-size:24px 24px;">
+    <tr>
+        <td align="center" style="padding:36px 16px;">
+            <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+                <!-- Brand strip -->
+                <tr>
+                    <td style="padding:0 4px 14px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="vertical-align:middle;">
+                                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#b71422;border:2px solid #2d2d2d;vertical-align:middle;margin-right:8px;"></span>
+                                    <span style="font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#2d2d2d;vertical-align:middle;">BIOVERSE // THÔNG BÁO THANH TOÁN</span>
+                                </td>
+                                <td align="right" style="font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;font-weight:600;color:#76716a;letter-spacing:0.06em;">
+                                    ĐƠN HÀNG #<span th:text="${orderCode}">000000</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Neo-Brutalism Card -->
+                <tr>
+                    <td style="background:#ffffff;border:2.5px solid #2d2d2d;border-radius:18px;box-shadow:5px 5px 0 #2d2d2d;overflow:hidden;">
+                        <!-- Header band -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:24px 28px 20px;border-bottom:2px dashed #f1c5c5;background:#fff8f8;">
+                                    <p style="margin:0 0 10px;display:inline-block;padding:4px 12px;background:#ffdad6;border:1.5px solid #b71422;border-radius:999px;font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;color:#b71422;text-transform:uppercase;">
+                                        ⚠ CHƯA HOÀN TẤT THANH TOÁN
+                                    </p>
+                                    <h1 style="margin:0;font-family:Epilogue,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:800;color:#1b1c1c;letter-spacing:-0.02em;">
+                                        Giao dịch chưa hoàn thành
+                                    </h1>
+                                    <p style="margin:8px 0 0;font-size:14px;line-height:1.5;color:#6b3a37;">
+                                        Đơn hàng gói cước chưa được thanh toán thành công hoặc đã bị hủy.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Body content -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:28px;">
+                                    <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#2d2d2d;">
+                                        Xin chào <strong th:text="${fullName}">bạn</strong>,
+                                    </p>
+                                    <p style="margin:0 0 20px;font-size:14px;line-height:1.65;color:#5b403e;">
+                                        BioVerse gửi email này để thông báo về trạng thái đơn thanh toán gói cước của bạn:
+                                    </p>
+
+                                    <!-- Receipt details table -->
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:2px solid #2d2d2d;border-radius:12px;background:#fbfaf8;margin-bottom:24px;overflow:hidden;">
+                                        <tr>
+                                            <td style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:13px;color:#76716a;width:40%;">
+                                                Mã đơn hàng
+                                            </td>
+                                            <td align="right" style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#1b1c1c;">
+                                                #<span th:text="${orderCode}">000000</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:13px;color:#76716a;">
+                                                Gói cước
+                                            </td>
+                                            <td align="right" style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:14px;font-weight:700;color:#1b1c1c;" th:text="${planName}">
+                                                Gói Học Sinh Kỳ I
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:13px;color:#76716a;">
+                                                Số tiền dự kiến
+                                            </td>
+                                            <td align="right" style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#2d2d2d;" th:text="${amountFormatted}">
+                                                59.000đ
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:13px;color:#76716a;">
+                                                Thời gian ghi nhận
+                                            </td>
+                                            <td align="right" style="padding:14px 18px;border-bottom:1px solid #e5dfd7;font-size:13px;color:#2d2d2d;" th:text="${failedAtFormatted}">
+                                                20:00 17/10/2026
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:14px 18px;font-size:13px;color:#76716a;">
+                                                Lý do ghi nhận
+                                            </td>
+                                            <td align="right" style="padding:14px 18px;font-size:13px;font-weight:600;color:#b71422;" th:text="${reason}">
+                                                Đơn thanh toán đã bị hủy hoặc quá thời hạn
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Reassurance Box -->
+                                    <div style="background:#fff9e6;border:2px dashed #f57f17;border-radius:12px;padding:16px 20px;margin-bottom:26px;">
+                                        <p style="margin:0 0 6px;font-family:Epilogue,Arial,sans-serif;font-size:14px;font-weight:700;color:#b25e00;">
+                                            ℹ Bạn đã chuyển khoản nhưng bị báo chưa thành công?
+                                        </p>
+                                        <p style="margin:0;font-size:13px;line-height:1.6;color:#6d4c1b;">
+                                            Xin bạn hoàn toàn yên tâm. Nếu tài khoản ngân hàng của bạn đã bị trừ tiền, hãy phản hồi lại cho chúng tôi kèm mã đơn <strong>#<span th:text="${orderCode}">000000</span></strong> để kiểm tra đối soát và kích hoạt gói ngay lập tức.
+                                        </p>
+                                    </div>
+
+                                    <!-- CTA Button -->
+                                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td align="center">
+                                                <a th:href="${pricingUrl}"
+                                                   href="https://bioverse.eraidev.id.vn/pages/pricing.html"
+                                                   style="display:inline-block;padding:14px 28px;background:#b71422;color:#ffffff;text-decoration:none;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border:2.5px solid #2d2d2d;border-radius:10px;box-shadow:4px 4px 0 #2d2d2d;">
+                                                    Chọn Gói &amp; Thử Thanh Toán Lại
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#76716a;text-align:center;">
+                                        Nếu bạn chủ động hủy đơn hàng, bạn không cần thực hiện thêm thao tác nào.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Footer -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="padding:16px 28px 22px;border-top:2px dashed #e4e2e1;background:#f6f3f2;font-size:12px;line-height:1.55;color:#76716a;">
+                                    © <span th:text="${year}">2026</span> BioVerse · Nền tảng học tập Khoa học Tự nhiên & Mô hình 3D.
+                                    <br/>
+                                    <a th:href="${appUrl}" href="https://bioverse.eraidev.id.vn" style="color:#2e5ea2;font-weight:600;text-decoration:underline;">bioverse.eraidev.id.vn</a>
+                                    · Email tự động gửi từ hệ thống thanh toán.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding:18px 8px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:11px;color:#8f6f6d;letter-spacing:0.04em;">
+                        Hỗ trợ thanh toán BioVerse · Cổng PayOS
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

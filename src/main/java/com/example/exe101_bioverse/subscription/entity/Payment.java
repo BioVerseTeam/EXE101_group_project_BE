@@ -74,6 +74,9 @@ public class Payment {
     @Column(name = "webhook_data", columnDefinition = "jsonb")
     private Map<String, Object> webhookData;
 
+    @Column(name = "email_notified_at")
+    private LocalDateTime emailNotifiedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

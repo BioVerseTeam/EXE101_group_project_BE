@@ -11,12 +11,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Service
@@ -134,5 +139,108 @@ public class MailService {
             trimmed = trimmed.substring(0, trimmed.length() - 1);
         }
         return trimmed;
+    }
+
+    @Async
+    public void sendPaymentSuccess(
+            String to,
+            String fullName,
+            Long orderCode,
+            String planName,
+            BigDecimal amount,
+            LocalDateTime paidAt,
+            LocalDateTime endDate,
+            String transactionId
+    ) {
+        if (from == null || from.isBlank()) {
+            log.warn("Cannot send payment success email: MAIL_FROM is not configured");
+            return;
+        }
+
+        try {
+            Context context = new Context(Locale.forLanguageTag("vi"));
+            context.setVariable("fullName", displayName(fullName));
+            context.setVariable("orderCode", orderCode);
+            context.setVariable("planName", planName != null ? planName : "Gói BioVerse Premium");
+            context.setVariable("amountFormatted", formatVnd(amount));
+            context.setVariable("paidAtFormatted", formatDateTime(paidAt != null ? paidAt : LocalDateTime.now()));
+            context.setVariable("endDateFormatted", endDate != null ? formatDate(endDate) : null);
+            context.setVariable("transactionId", transactionId);
+            context.setVariable("year", Year.now().getValue());
+            context.setVariable("appUrl", appUrl);
+
+            String html = emailTemplateEngine.process("mail/payment-success", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            helper.setTo(to);
+            helper.setSubject("BioVerse · Xác nhận thanh toán thành công đơn hàng #" + orderCode);
+            helper.setFrom(new InternetAddress(from, fromName, StandardCharsets.UTF_8.name()));
+            helper.setText(html, true);
+            mailSender.send(message);
+            log.info("Payment success email sent to {} for orderCode {}", to, orderCode);
+        } catch (Exception ex) {
+            log.error("Failed to send payment success email to {} for orderCode {}", to, orderCode, ex);
+        }
+    }
+
+    @Async
+    public void sendPaymentFailed(
+            String to,
+            String fullName,
+            Long orderCode,
+            String planName,
+            BigDecimal amount,
+            LocalDateTime failedAt,
+            String reason
+    ) {
+        if (from == null || from.isBlank()) {
+            log.warn("Cannot send payment failed email: MAIL_FROM is not configured");
+            return;
+        }
+
+        try {
+            Context context = new Context(Locale.forLanguageTag("vi"));
+            context.setVariable("fullName", displayName(fullName));
+            context.setVariable("orderCode", orderCode);
+            context.setVariable("planName", planName != null ? planName : "Gói BioVerse");
+            context.setVariable("amountFormatted", formatVnd(amount));
+            context.setVariable("failedAtFormatted", formatDateTime(failedAt != null ? failedAt : LocalDateTime.now()));
+            context.setVariable("reason", (reason != null && !reason.isBlank()) ? reason : "Giao dịch bị hủy hoặc quá thời hạn thanh toán");
+            context.setVariable("year", Year.now().getValue());
+            context.setVariable("appUrl", appUrl);
+            context.setVariable("pricingUrl", appUrl + "/pages/pricing.html");
+
+            String html = emailTemplateEngine.process("mail/payment-failed", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            helper.setTo(to);
+            helper.setSubject("BioVerse · Thông báo thanh toán chưa hoàn tất đơn hàng #" + orderCode);
+            helper.setFrom(new InternetAddress(from, fromName, StandardCharsets.UTF_8.name()));
+            helper.setText(html, true);
+            mailSender.send(message);
+            log.info("Payment failed email sent to {} for orderCode {}", to, orderCode);
+        } catch (Exception ex) {
+            log.error("Failed to send payment failed email to {} for orderCode {}", to, orderCode, ex);
+        }
+    }
+
+    private String formatVnd(BigDecimal amount) {
+        if (amount == null) return "0đ";
+        NumberFormat nf = NumberFormat.getInstance(Locale.forLanguageTag("vi-VN"));
+        return nf.format(amount) + "đ";
+    }
+
+    private String formatDateTime(LocalDateTime dt) {
+        if (dt == null) return "—";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+        return dt.format(formatter);
+    }
+
+    private String formatDate(LocalDateTime dt) {
+        if (dt == null) return "—";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return dt.format(formatter);
     }
 }
