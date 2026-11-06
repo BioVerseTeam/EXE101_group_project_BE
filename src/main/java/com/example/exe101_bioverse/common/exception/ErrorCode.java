@@ -80,7 +80,10 @@ public enum ErrorCode {
 
     // Badge 152x
     BADGE_NOT_FOUND(1520, "Không tìm thấy danh hiệu STEM", HttpStatus.NOT_FOUND),
-    BADGE_CODE_EXISTS(1521, "Mã danh hiệu đã tồn tại", HttpStatus.CONFLICT);
+    BADGE_CODE_EXISTS(1521, "Mã danh hiệu đã tồn tại", HttpStatus.CONFLICT),
+
+    // Feedback 18xx
+    FEEDBACK_NOT_FOUND(1801, "Không tìm thấy ý kiến đóng góp", HttpStatus.NOT_FOUND);
 
 
     private final int code;
