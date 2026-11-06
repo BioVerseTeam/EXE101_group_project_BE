@@ -146,10 +146,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         sb.append('\uFEFF');
 
         // CSV Header
-        sb.append("Mã ID,Ngày gửi,Người gửi,Email,Loại góp ý,Đánh giá (Sao),Tiêu đề,Nội dung chi tiết,Đường dẫn trang,Thiết bị & Trình duyệt,Trạng thái,Ghi chú BQT,Thời gian phản hồi\n");
+        sb.append("STT,Ngày gửi,Người gửi,Email,Loại góp ý,Đánh giá (Sao),Tiêu đề,Nội dung chi tiết,Đường dẫn trang,Thiết bị & Trình duyệt,Trạng thái,Ghi chú BQT,Thời gian phản hồi\n");
 
+        int stt = 1;
         for (Feedback f : items) {
-            String id = String.valueOf(f.getId());
+            String indexStr = String.valueOf(stt++);
             String createdAt = f.getCreatedAt() != null ? f.getCreatedAt().format(dtf) : "";
             String sender = f.getUser() != null ? f.getUser().getFullName() : (f.getUserName() != null ? f.getUserName() : "Khách ẩn danh");
             String email = f.getUser() != null ? f.getUser().getEmail() : (f.getUserEmail() != null ? f.getUserEmail() : "");
@@ -163,7 +164,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             String notes = f.getAdminNotes() != null ? f.getAdminNotes() : "";
             String respondedAt = f.getRespondedAt() != null ? f.getRespondedAt().format(dtf) : "";
 
-            sb.append(escapeCsv(id)).append(",")
+            sb.append(escapeCsv(indexStr)).append(",")
               .append(escapeCsv(createdAt)).append(",")
               .append(escapeCsv(sender)).append(",")
               .append(escapeCsv(email)).append(",")
