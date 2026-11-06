@@ -61,6 +61,8 @@ public class SecurityConfig {
                                 "/api/plans/**",
                                 "/api/badges",
                                 "/api/badges/**",
+                                "/api/feedbacks",
+                                "/api/feedbacks/**",
                                 "/api/payments/payos/webhook"
                         ).permitAll()
                         .requestMatchers("/api/ai/conversations", "/api/ai/conversations/**").authenticated()
