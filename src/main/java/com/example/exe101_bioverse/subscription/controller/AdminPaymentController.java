@@ -3,6 +3,7 @@ package com.example.exe101_bioverse.subscription.controller;
 import com.example.exe101_bioverse.common.response.ApiResponse;
 import com.example.exe101_bioverse.common.response.PageResponse;
 import com.example.exe101_bioverse.subscription.dto.response.PaymentResponse;
+import com.example.exe101_bioverse.subscription.dto.response.PaymentSummaryResponse;
 import com.example.exe101_bioverse.subscription.enums.PaymentStatus;
 import com.example.exe101_bioverse.subscription.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -36,6 +39,21 @@ public class AdminPaymentController {
             @RequestParam(defaultValue = "20") int size) {
         PageResponse<PaymentResponse> response = paymentService.searchPayments(
                 status, keyword, PageRequest.of(page, size));
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/summary")
+    @Operation(summary = "Lấy thống kê tổng quan doanh thu và các giao dịch thanh toán thành công")
+    public ResponseEntity<ApiResponse<PaymentSummaryResponse>> getPaymentSummary() {
+        PaymentSummaryResponse response = paymentService.getPaymentSummary();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "Lấy danh sách các giao dịch thanh toán phục vụ xuất báo cáo Excel")
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getExportPayments(
+            @RequestParam(required = false) PaymentStatus status) {
+        List<PaymentResponse> response = paymentService.getExportPayments(status);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

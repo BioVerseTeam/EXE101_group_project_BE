@@ -4,6 +4,7 @@ import com.example.exe101_bioverse.common.response.PageResponse;
 import com.example.exe101_bioverse.subscription.dto.request.CheckoutRequest;
 import com.example.exe101_bioverse.subscription.dto.response.CheckoutResponse;
 import com.example.exe101_bioverse.subscription.dto.response.PaymentResponse;
+import com.example.exe101_bioverse.subscription.dto.response.PaymentSummaryResponse;
 import com.example.exe101_bioverse.subscription.enums.PaymentStatus;
 import org.springframework.data.domain.Pageable;
 
@@ -23,4 +24,8 @@ public interface PaymentService {
     List<PaymentResponse> listUserPayments(Long userId);
 
     PageResponse<PaymentResponse> searchPayments(PaymentStatus status, String keyword, Pageable pageable);
+
+    PaymentSummaryResponse getPaymentSummary();
+
+    List<PaymentResponse> getExportPayments(PaymentStatus status);
 }

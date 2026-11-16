@@ -10,6 +10,7 @@ import com.example.exe101_bioverse.subscription.config.PayosConfig;
 import com.example.exe101_bioverse.subscription.dto.request.CheckoutRequest;
 import com.example.exe101_bioverse.subscription.dto.response.CheckoutResponse;
 import com.example.exe101_bioverse.subscription.dto.response.PaymentResponse;
+import com.example.exe101_bioverse.subscription.dto.response.PaymentSummaryResponse;
 import com.example.exe101_bioverse.subscription.entity.Payment;
 import com.example.exe101_bioverse.subscription.entity.Plan;
 import com.example.exe101_bioverse.subscription.entity.Subscription;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.payos.PayOS;
@@ -38,6 +40,7 @@ import vn.payos.model.v2.paymentRequests.PaymentLinkStatus;
 import vn.payos.model.webhooks.WebhookData;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -431,5 +434,42 @@ public class PaymentServiceImpl implements PaymentService {
                 .page(page.getNumber())
                 .size(page.getSize())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentSummaryResponse getPaymentSummary() {
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayEnd = todayStart.plusDays(1);
+        LocalDateTime monthStart = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime monthEnd = monthStart.plusMonths(1);
+
+        BigDecimal totalRevenue = paymentRepository.sumAmountByStatus(PaymentStatus.PAID);
+        long paidCount = paymentRepository.countByStatus(PaymentStatus.PAID);
+        BigDecimal todayRevenue = paymentRepository.sumAmountByStatusAndPaidAtBetween(
+                PaymentStatus.PAID, todayStart, todayEnd);
+        BigDecimal monthRevenue = paymentRepository.sumAmountByStatusAndPaidAtBetween(
+                PaymentStatus.PAID, monthStart, monthEnd);
+        long totalTransactions = paymentRepository.count();
+
+        return PaymentSummaryResponse.builder()
+                .totalRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+                .paidCount(paidCount)
+                .todayRevenue(todayRevenue != null ? todayRevenue : BigDecimal.ZERO)
+                .monthRevenue(monthRevenue != null ? monthRevenue : BigDecimal.ZERO)
+                .totalTransactions(totalTransactions)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getExportPayments(PaymentStatus status) {
+        List<Payment> list;
+        if (status != null) {
+            list = paymentRepository.findAllByStatusOrderByPaidAtDesc(status);
+        } else {
+            list = paymentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+        return list.stream().map(PaymentResponse::from).toList();
     }
 }
